@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v0.1.3] - 2024-02-09
+## [v0.1.3] - 2024-12-04
 
 ### 改进
 - 增强了 `ModelManager` 和 `AssistantController` 的单元测试模拟策略。
