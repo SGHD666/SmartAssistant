@@ -1,0 +1,13 @@
+{
+  "TestSettings": {
+    "DataDirectory": "TestData",
+    "TimeoutSeconds": 30,
+    "RetryCount": 3
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning"
+    }
+  }
+}

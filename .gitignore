@@ -131,6 +131,36 @@ $RECYCLE.BIN/
 *.VC.db
 *.VC.VC.opendb
 
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+coverage.json
+coverage.cobertura.xml
+coveragereport/
+TestResults/
+
+# CI/CD
+.github/
+.azure/
+*.pubxml
+*.pubxml.user
+*.publishsettings
+node_modules/
+orleans.codegen.cs
+
 # Application-specific
 *.log
 appsettings.Development.json
+appsettings.Local.json
+*.env
+secrets.json
+launchSettings.json
+
+# Temporary files
+*.bak
+*.cache
+*.temp
+*.tmp
+[Tt]emp/

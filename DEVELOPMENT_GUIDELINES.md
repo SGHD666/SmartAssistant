@@ -54,6 +54,102 @@
   - 确保向后兼容
   - 维护系统稳定性
 
+## Git 工作流
+
+### 分支策略
+- `main` 分支
+  - 生产环境代码
+  - 只接受来自 `develop` 的合并
+  - 每次合并都要打标签
+- `develop` 分支
+  - 开发主分支
+  - 包含最新的开发特性
+  - 保持可构建状态
+- 功能分支 `feature/*`
+  - 从 `develop` 创建
+  - 完成后合并回 `develop`
+  - 命名规范：`feature/功能名称`
+- 修复分支 `bugfix/*`
+  - 用于修复 `develop` 中的问题
+  - 完成后合并回 `develop`
+- 热修复分支 `hotfix/*`
+  - 用于修复生产环境问题
+  - 从 `main` 创建
+  - 同时合并回 `main` 和 `develop`
+
+### 提交规范
+- 提交信息格式：
+  ```
+  <type>(<scope>): <subject>
+
+  <body>
+
+  <footer>
+  ```
+- Type 类型：
+  - feat: 新功能
+  - fix: 修复bug
+  - docs: 文档更新
+  - style: 代码格式调整
+  - refactor: 重构
+  - test: 测试相关
+  - chore: 构建/工具链相关
+- 示例：
+  ```
+  feat(ui): add message type indicator
+
+  - Add icon color converter
+  - Implement message type enum
+  - Update UI to show different colors
+
+  Closes #123
+  ```
+
+## 单元测试规范
+
+### 测试原则
+1. 单一职责
+   - 每个测试只测试一个场景
+   - 保持测试简单明了
+2. 可重复性
+   - 测试结果必须稳定
+   - 不依赖外部环境
+3. 独立性
+   - 测试之间相互独立
+   - 避免测试间的依赖
+
+### 测试结构
+1. AAA模式
+   ```csharp
+   [Fact]
+   public void Method_Scenario_ExpectedResult()
+   {
+       // Arrange - 准备测试数据和环境
+       var sut = new SystemUnderTest();
+       var input = "test input";
+
+       // Act - 执行被测试的代码
+       var result = sut.Method(input);
+
+       // Assert - 验证结果
+       Assert.Equal(expected, result);
+   }
+   ```
+
+2. 命名规范
+   - 类名：`{被测试类}Tests`
+   - 方法名：`{被测试方法}_{测试场景}_{预期结果}`
+
+### 测试覆盖
+- 代码覆盖率目标：80%以上
+- 重点覆盖：
+  - 业务逻辑
+  - 边界条件
+  - 错误处理
+- 可以忽略：
+  - 简单属性
+  - 框架生成的代码
+
 ## 开发流程
 
 1. 新功能开发
@@ -83,5 +179,7 @@
 4. 修复bug不引入新问题
 5. 保持代码可读性
 6. 全面分析解决问题
+7. 遵循Git工作流规范
+8. 保持测试用例的质量
 
 本文档作为开发过程中的首要参考指南，每次开始开发前必须先阅读并遵循这些准则。

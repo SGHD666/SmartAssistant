@@ -2,6 +2,40 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.1.2] - 2024-02-08
+
+### Added
+- Git工作流规范
+  - 详细的分支策略说明
+  - 提交消息格式规范
+  - 代码审查流程
+- 测试框架配置
+  - 单元测试规范
+  - 测试覆盖率要求（80%）
+  - 测试命名约定
+- CI/CD配置
+  - GitHub Actions工作流
+  - 自动化测试运行
+  - 代码质量检查
+
+### Technical Details
+- 更新了所有主要文档
+  - 完善了开发指南
+  - 更新了Git工作流程
+  - 补充了测试规范
+- 配置了代码质量工具
+  - 添加了代码覆盖率检查
+  - 配置了静态代码分析
+  - 设置了代码风格检查
+
+### Dependencies
+- 更新到 .NET 8.0
+- 添加测试相关包：
+  - xUnit
+  - Moq
+  - FluentAssertions
+  - Coverlet
+
 ## [v0.1.1] - 2024-02-07
 
 ### Added
