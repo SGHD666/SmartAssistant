@@ -1,9 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
-using Avalonia.VisualTree;
+using Avalonia;
 
 namespace SmartAssistant.Tests.UI.Helpers
 {
@@ -21,7 +19,8 @@ namespace SmartAssistant.Tests.UI.Helpers
                 throw new ArgumentNullException(nameof(button));
 
             var clickEvent = new RoutedEventArgs(Button.ClickEvent);
-            await button.RaiseEventAsync(clickEvent);
+            button.RaiseEvent(clickEvent);
+            await Task.CompletedTask; 
         }
 
         /// <summary>
@@ -37,18 +36,16 @@ namespace SmartAssistant.Tests.UI.Helpers
             {
                 Text = text
             };
-            await textBox.RaiseEventAsync(textInputEvent);
+            textBox.RaiseEvent(textInputEvent);
+            await Task.CompletedTask; 
         }
 
         /// <summary>
         /// 查找控件中的子控件
         /// </summary>
-        public static T FindControl<T>(IVisual parent, string name) where T : class, IControl
+        public static T? FindControl<T>(TopLevel parent, string name) where T : Control
         {
-            if (parent == null)
-                throw new ArgumentNullException(nameof(parent));
-
-            return parent.FindControl<T>(name);
+            return parent == null ? throw new ArgumentNullException(nameof(parent)) : parent.FindControl<T>(name);
         }
 
         /// <summary>
@@ -56,28 +53,29 @@ namespace SmartAssistant.Tests.UI.Helpers
         /// </summary>
         public static async Task SelectComboBoxItem(ComboBox comboBox, object item)
         {
-            if (comboBox == null)
-                throw new ArgumentNullException(nameof(comboBox));
+            ArgumentNullException.ThrowIfNull(comboBox);
 
             comboBox.SelectedItem = item;
             var selectionChangedEvent = new SelectionChangedEventArgs(
                 ComboBox.SelectionChangedEvent,
                 Array.Empty<object>(),
                 new[] { item });
-            await comboBox.RaiseEventAsync(selectionChangedEvent);
+            comboBox.RaiseEvent(selectionChangedEvent);
+            await Task.CompletedTask; 
         }
 
         /// <summary>
         /// 模拟切换CheckBox状态
         /// </summary>
+        [Obsolete]
         public static async Task ToggleCheckBox(CheckBox checkBox, bool isChecked)
         {
-            if (checkBox == null)
-                throw new ArgumentNullException(nameof(checkBox));
+            ArgumentNullException.ThrowIfNull(checkBox);
 
             checkBox.IsChecked = isChecked;
             var toggledEvent = new RoutedEventArgs(CheckBox.CheckedEvent);
-            await checkBox.RaiseEventAsync(toggledEvent);
+            checkBox.RaiseEvent(toggledEvent);
+            await Task.CompletedTask; 
         }
     }
 }

@@ -21,7 +21,7 @@ namespace SmartAssistant.UI.ViewModels
         private readonly ModelSettings _modelSettings;
         private readonly AssistantController _assistantController;
         private readonly ILogger<MainWindowViewModel> _logger;
-        private static readonly Dictionary<string, LLMType> _modelTypeMap = new()
+        private readonly Dictionary<string, LLMType> _modelTypeMap = new()
         {
             { "GPT-3.5", LLMType.OpenAI_GPT35 },
             { "GPT-4", LLMType.OpenAI_GPT4 },
@@ -47,66 +47,79 @@ namespace SmartAssistant.UI.ViewModels
         [ObservableProperty]
         private bool _isRateLimited;
 
+        [ObservableProperty]
+        private bool _isRunning;
+
+        [ObservableProperty]
+        private string _statusMessage = "Assistant is stopped";
+
         public ObservableCollection<ChatMessage> Messages { get; } = new();
         public ObservableCollection<string> AvailableModels { get; } = new();
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MainWindowViewModel"/> class.
+        /// </summary>
+        /// <param name="modelManager"></param>
+        /// <param name="modelSettings"></param>
+        /// <param name="assistantController"></param>
+        /// <param name="logger"></param>
         public MainWindowViewModel(
             ModelManager modelManager, 
             ModelSettings modelSettings, 
             AssistantController assistantController,
             ILogger<MainWindowViewModel> logger)
         {
-            _modelManager = modelManager;
-            _modelSettings = modelSettings;
-            _assistantController = assistantController;
-            _logger = logger;
-            _logger.LogDebug("MainWindowViewModel constructor completed");
+            this._modelManager = modelManager;
+            this._modelSettings = modelSettings;
+            this._assistantController = assistantController;
+            this._logger = logger;
+            this._logger.LogDebug("MainWindowViewModel constructor completed");
         }
 
         public async Task InitializeAsync()
         {
             try
             {
-                IsInitializing = true;
-                IsBusy = true;
-                _logger.LogDebug("Starting async initialization");
+                this.IsInitializing = true;
+                this.IsBusy = true;
+                this._logger.LogDebug("Starting async initialization");
 
                 // 初始化可用模型列表
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    foreach (var (display, type) in _modelTypeMap)
+                    foreach (var (display, type) in this._modelTypeMap)
                     {
-                        if (_modelSettings.ModelConfigs.Values.Any(c => c.Type == type))
+                        if (this._modelSettings.ModelConfigs.Values.Any(c => c.Type == type))
                         {
-                            AvailableModels.Add(display);
-                            _logger.LogDebug("Added available model: {ModelDisplay}", display);
+                            this.AvailableModels.Add(display);
+                            this._logger.LogDebug("Added available model: {ModelDisplay}", display);
                         }
                     }
 
                     // 设置当前选中的模型
-                    SelectedModelDisplay = _modelTypeMap
-                        .FirstOrDefault(x => x.Value == _modelSettings.CurrentModel)
-                        .Key ?? AvailableModels.FirstOrDefault() ?? "GPT-3.5";
+                    this.SelectedModelDisplay = this._modelTypeMap
+                        .FirstOrDefault(x => x.Value == this._modelSettings.CurrentModel)
+                        .Key ?? this.AvailableModels.FirstOrDefault() ?? "GPT-3.5";
                     
-                    _logger.LogInformation("Selected model: {SelectedModel}", SelectedModelDisplay);
+                    this._logger.LogInformation("Selected model: {SelectedModel}", this.SelectedModelDisplay);
                 });
 
                 // 验证服务状态
                 try 
                 {
                     // 尝试发送一个简单的测试消息来验证服务状态
-                    var response = await _assistantController.ProcessUserInputAsync("COMMAND:test_connection");
+                    var response = await this._assistantController.ProcessUserInputAsync("COMMAND:test_connection");
                     if (response != null)
                     {
-                        _logger.LogInformation("Core services verified successfully");
+                        this._logger.LogInformation("Core services verified successfully");
                     }
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to verify core services");
+                    this._logger.LogError(ex, "Failed to verify core services");
                     await Dispatcher.UIThread.InvokeAsync(() =>
                     {
-                        Messages.Add(new ChatMessage
+                        this.Messages.Add(new ChatMessage
                         {
                             Content = "Failed to initialize core services. Please check your configuration and try again.",
                             Type = Common.MessageType.Error,
@@ -116,87 +129,77 @@ namespace SmartAssistant.UI.ViewModels
                     return;
                 }
 
-                _logger.LogDebug("Async initialization completed");
+                this._logger.LogDebug("Async initialization completed");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during async initialization");
+                this._logger.LogError(ex, "Error during async initialization");
                 throw;
             }
             finally
             {
-                IsInitializing = false;
-                IsBusy = false;
+                this.IsInitializing = false;
+                this.IsBusy = false;
             }
         }
 
         partial void OnSelectedModelDisplayChanged(string value)
         {
-            if (IsInitializing) return;
-            
-            _logger.LogInformation("Model selection changed to: {NewModel}", value);
-            if (_modelTypeMap.TryGetValue(value, out var type))
+            if (this.IsInitializing) return;
+
+            this._logger.LogInformation("Model selection changed to: {NewModel}", value);
+
+            if (this._modelTypeMap.TryGetValue(value, out var type))
             {
-                _modelManager.SwitchModel(type);
-                _logger.LogDebug("Model switched to type: {ModelType}", type);
+                this._modelManager.SwitchModel(type);
+                this._logger.LogDebug("Model switched to type: {ModelType}", type);
             }
         }
 
         [RelayCommand]
         private async Task SendMessage()
         {
-            if (string.IsNullOrWhiteSpace(UserInput))
+            if (string.IsNullOrWhiteSpace(this.UserInput))
             {
-                _logger.LogDebug("Empty user input, skipping message send");
+                this._logger.LogDebug("Empty user input, skipping message send");
                 return;
             }
 
-            _logger.LogDebug("Processing user message: {UserInput}", UserInput);
-            IsBusy = true;
+            this._logger.LogDebug("Processing user message: {UserInput}", this.UserInput);
+            this.IsBusy = true;
             try
             {
                 // 添加用户消息
-                var userMessage = new ChatMessage
-                {
-                    Content = UserInput,
-                    Timestamp = DateTime.Now,
-                    Type = MessageType.User
-                };
-                Messages.Add(userMessage);
+                var userMessage = new ChatMessage(this.UserInput, DateTime.Now, MessageType.User);
+                this.Messages.Add(userMessage);
 
                 // 清空输入
-                UserInput = string.Empty;
+                this.UserInput = string.Empty;
 
                 // 获取助手响应
-                var response = await _assistantController.GetResponseAsync(userMessage.Content);
-                
+                var response = await this._assistantController.GetResponseAsync(userMessage.Content);
+
                 // 添加助手消息
-                var assistantMessage = new ChatMessage
-                {
-                    Content = response,
-                    Timestamp = DateTime.Now,
-                    Type = MessageType.Assistant
-                };
-                Messages.Add(assistantMessage);
+                var assistantMessage = new ChatMessage(
+                    content: response,
+                    timestamp: DateTime.Now,
+                    type: MessageType.Assistant
+                );
+                this.Messages.Add(assistantMessage);
             }
             catch (RateLimitExceededException ex)
             {
-                await HandleRateLimitExceptionAsync(ex);
+                await this.HandleRateLimitExceptionAsync(ex);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting response");
-                var errorMessage = new ChatMessage
-                {
-                    Content = "Sorry, an error occurred while processing your request. Please try again.",
-                    Timestamp = DateTime.Now,
-                    Type = MessageType.Error
-                };
-                Messages.Add(errorMessage);
+                this._logger.LogError(ex, "Error getting response");
+                var errorMessage = new ChatMessage(ex.Message, DateTime.Now, MessageType.Error);
+                this.Messages.Add(errorMessage);
             }
             finally
             {
-                IsBusy = false;
+                this.IsBusy = false;
             }
         }
 
@@ -204,48 +207,48 @@ namespace SmartAssistant.UI.ViewModels
         {
             try
             {
-                IsRateLimited = true;
-                RateLimitStatus = $"Rate limit exceeded. Please wait {ex.RetryAfter.TotalMinutes:F0} minutes.";
+                this.IsRateLimited = true;
+                this.RateLimitStatus = $"Rate limit exceeded. Please wait {ex.RetryAfter.TotalMinutes:F0} minutes.";
                 
-                Messages.Add(new ChatMessage 
+                this.Messages.Add(new ChatMessage 
                 { 
                     Content = $"Rate limit exceeded. The system will automatically retry in {ex.RetryAfter.TotalMinutes:F0} minutes.", 
                     Timestamp = DateTime.Now,
                     Type = MessageType.Error
                 });
 
-                _logger.LogWarning("Rate limit exceeded. Waiting for {Minutes} minutes", ex.RetryAfter.TotalMinutes);
+                this._logger.LogWarning("Rate limit exceeded. Waiting for {Minutes} minutes", ex.RetryAfter.TotalMinutes);
                 await Task.Delay(TimeSpan.FromSeconds(1)); // Give UI time to update
 
                 // Start countdown
                 var countdown = (int)ex.RetryAfter.TotalMinutes;
-                while (countdown > 0 && IsRateLimited)
+                while (countdown > 0 && this.IsRateLimited)
                 {
-                    RateLimitStatus = $"Rate limit exceeded. Please wait {countdown} minutes.";
+                    this.RateLimitStatus = $"Rate limit exceeded. Please wait {countdown} minutes.";
                     await Task.Delay(TimeSpan.FromMinutes(1));
                     countdown--;
-                    _logger.LogDebug("Rate limit countdown: {Minutes} minutes remaining", countdown);
+                    this._logger.LogDebug("Rate limit countdown: {Minutes} minutes remaining", countdown);
                 }
 
-                if (IsRateLimited) // If user hasn't manually cancelled
+                if (this.IsRateLimited) // If user hasn't manually cancelled
                 {
-                    IsRateLimited = false;
-                    RateLimitStatus = string.Empty;
-                    Messages.Add(new ChatMessage 
+                    this.IsRateLimited = false;
+                    this.RateLimitStatus = string.Empty;
+                    this.Messages.Add(new ChatMessage 
                     { 
                         Content = "Rate limit reset. You can continue now.", 
                         Timestamp = DateTime.Now,
                         Type = MessageType.System
                     });
-                    _logger.LogInformation("Rate limit reset completed");
+                    this._logger.LogInformation("Rate limit reset completed");
                 }
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Error handling rate limit exception");
-                IsRateLimited = false;
-                RateLimitStatus = string.Empty;
-                Messages.Add(new ChatMessage 
+                this._logger.LogError(e, "Error handling rate limit exception");
+                this.IsRateLimited = false;
+                this.RateLimitStatus = string.Empty;
+                this.Messages.Add(new ChatMessage 
                 { 
                     Content = "An error occurred while handling rate limit. Please try again.", 
                     Timestamp = DateTime.Now,
@@ -257,15 +260,32 @@ namespace SmartAssistant.UI.ViewModels
         [RelayCommand]
         private void CancelRateLimit()
         {
-            _logger.LogInformation("User cancelled rate limit wait");
-            IsRateLimited = false;
-            RateLimitStatus = string.Empty;
-            Messages.Add(new ChatMessage 
+            this._logger.LogInformation("User cancelled rate limit wait");
+            this.IsRateLimited = false;
+            this.RateLimitStatus = string.Empty;
+            this.Messages.Add(new ChatMessage 
             { 
                 Content = "Rate limit wait cancelled by user.", 
                 Timestamp = DateTime.Now,
                 Type = MessageType.System
             });
         }
+
+        [RelayCommand(CanExecute = nameof(CanStart))]
+        private void Start()
+        {
+            this.IsRunning = true;
+            this.StatusMessage = "Assistant is running";
+        }
+
+        [RelayCommand(CanExecute = nameof(CanStop))]
+        private void Stop()
+        {
+            this.IsRunning = false;
+            this.StatusMessage = "Assistant is stopped";
+        }
+
+        private bool CanStart() => !this.IsRunning;
+        private bool CanStop() => this.IsRunning;
     }
 }

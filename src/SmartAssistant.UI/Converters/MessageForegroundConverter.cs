@@ -4,11 +4,11 @@
 
 namespace SmartAssistant.UI.Converters
 {
+    using System;
+    using System.Globalization;
     using Avalonia.Data.Converters;
     using Avalonia.Media;
     using SmartAssistant.UI.Common;
-    using System;
-    using System.Globalization;
 
     /// <summary>
     /// Converts message type to foreground color
@@ -23,7 +23,7 @@ namespace SmartAssistant.UI.Converters
                 {
                     MessageType.Error => new SolidColorBrush(Colors.Red),
                     MessageType.System => new SolidColorBrush(Colors.Gray),
-                    _ => new SolidColorBrush(Colors.Black)
+                    _ => new SolidColorBrush(Colors.Black),
                 };
             }
             return new SolidColorBrush(Colors.Black);

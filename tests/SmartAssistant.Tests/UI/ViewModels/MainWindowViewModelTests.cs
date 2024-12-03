@@ -3,16 +3,51 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using SmartAssistant.UI.ViewModels;
 using Xunit;
+using SmartAssistant.Core.Models;
+using SmartAssistant.Core.Controllers;
+using Microsoft.Extensions.Logging;
+using Moq;
+using SmartAssistant.Core.Services.LLM;
+using SmartAssistant.Core.Models;
+using SmartAssistant.Core.Services; // Added using statement for LLMType
 
 namespace SmartAssistant.Tests.UI.ViewModels
 {
     public class MainWindowViewModelTests : ViewModelTestBase
     {
-        private MainWindowViewModel _viewModel;
+        private readonly MainWindowViewModel _viewModel;
+        private readonly Mock<ModelManager> _modelManager;
+        private readonly Mock<AssistantController> _assistantController;
+        private readonly Mock<ILogger<MainWindowViewModel>> _logger;
+        private readonly ModelSettings _modelSettings;
 
         public MainWindowViewModelTests()
         {
-            _viewModel = new MainWindowViewModel();
+            _modelSettings = new ModelSettings
+            {
+                CurrentModel = LLMType.QianWen,
+                ApiKey = "test-api-key",
+                PythonPath = "/test/python/path",
+                BasePath = "/test/base/path",
+                ModelConfigs = new Dictionary<string, LLMConfig>
+                {
+                    { "QianWen", new LLMConfig { Type = LLMType.QianWen, ModelId = "qwen-max" } }
+                }
+            };
+            var mockFactory = new Mock<ILLMFactory>();
+            mockFactory.Setup(factory => factory.CreateService(It.IsAny<LLMType>())).Returns(new Mock<ILanguageModelService>().Object);
+            _modelManager = new Mock<ModelManager>(_modelSettings, mockFactory.Object);
+            var mockLanguageModel = new Mock<ILanguageModelService>();
+            var mockTaskExecutor = new Mock<ITaskExecutionService>();
+            var mockLogger = new Mock<ILogger<AssistantController>>();
+            _assistantController = new Mock<AssistantController>(mockLanguageModel.Object, mockTaskExecutor.Object, mockLogger.Object);
+            _logger = new Mock<ILogger<MainWindowViewModel>>();
+
+            _viewModel = new MainWindowViewModel(
+                _modelManager.Object,
+                _modelSettings,
+                _assistantController.Object,
+                _logger.Object);
         }
 
         [Fact]

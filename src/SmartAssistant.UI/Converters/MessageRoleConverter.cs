@@ -1,17 +1,24 @@
-using Avalonia.Data.Converters;
-using System;
-using System.Globalization;
+// <copyright file="MessageRoleConverter.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace SmartAssistant.UI.Converters
 {
+    using System;
+    using System.Globalization;
+    using Avalonia.Data.Converters;
+
     public class MessageRoleConverter : IValueConverter
     {
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (value is bool isUser)
+            // Explicitly cast and check the value
+            bool? userFlag = value as bool?;
+            if (userFlag.HasValue)
             {
-                return isUser ? "You" : "Assistant";
+                return userFlag.Value ? "You" : "Assistant";
             }
+
             return "Unknown";
         }
 

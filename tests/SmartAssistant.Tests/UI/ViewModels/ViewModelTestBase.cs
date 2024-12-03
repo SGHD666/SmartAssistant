@@ -1,4 +1,5 @@
 using System;
+using System.Reactive;
 using System.Reactive.Concurrency;
 using Microsoft.Reactive.Testing;
 using SmartAssistant.Tests.Common;
