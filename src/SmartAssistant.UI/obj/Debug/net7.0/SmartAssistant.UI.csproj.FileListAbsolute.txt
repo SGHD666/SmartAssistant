@@ -1,7 +1,0 @@
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\SmartAssistant.UI.csproj.AssemblyReference.cache
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\Avalonia\Resources.Inputs.cache
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\Avalonia\resources
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\SmartAssistant.UI.GeneratedMSBuildEditorConfig.editorconfig
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\SmartAssistant.UI.AssemblyInfoInputs.cache
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\SmartAssistant.UI.AssemblyInfo.cs
-D:\SmartAssistant\src\SmartAssistant.UI\obj\Debug\net7.0\SmartAssistant.UI.csproj.CoreCompileInputs.cache
