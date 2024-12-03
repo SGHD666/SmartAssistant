@@ -1,0 +1,117 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="using:SmartAssistant.UI.ViewModels"
+        xmlns:material="using:Material.Icons.Avalonia"
+        xmlns:converters="using:SmartAssistant.UI.Converters"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="SmartAssistant.UI.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="SmartAssistant"
+        Width="1024"
+        Height="768"
+        WindowStartupLocation="CenterScreen"
+        IsVisible="True"
+       >
+
+    <Window.Resources>
+        <converters:MessageBackgroundConverter x:Key="MessageBackgroundConverter"/>
+        <converters:MessageAlignmentConverter x:Key="MessageAlignmentConverter"/>
+        <converters:MessageRoleConverter x:Key="MessageRoleConverter"/>
+        <converters:MessageForegroundConverter x:Key="MessageForegroundConverter"/>
+    </Window.Resources>
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel />
+    </Design.DataContext>
+
+    <Panel>
+        <Border Background="#FAFAFA">
+        </Border>
+
+        <Grid RowDefinitions="Auto,Auto,*,Auto" Margin="16">
+            <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                <TextBlock Text="SmartAssistant" 
+                         FontSize="24"
+                         VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1"
+                         ItemsSource="{Binding AvailableModels}"
+                         SelectedItem="{Binding SelectedModelDisplay}"
+                         Width="200"
+                         VerticalAlignment="Center"
+                         IsEnabled="{Binding !IsRateLimited}"/>
+            </Grid>
+
+            <Border Grid.Row="1" 
+                   IsVisible="{Binding IsRateLimited}"
+                   Background="#FFF3E0"
+                   BorderBrush="#FFB74D"
+                   BorderThickness="1"
+                   CornerRadius="4"
+                   Margin="0,0,0,16"
+                   Padding="16,8">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding RateLimitStatus}"
+                             Foreground="#F57C00"
+                             VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                           Content="Cancel Wait"
+                           Command="{Binding CancelRateLimitCommand}"
+                           Background="#FFB74D"
+                           Foreground="White"/>
+                </Grid>
+            </Border>
+
+            <ScrollViewer x:Name="ChatScrollViewer" Grid.Row="2" Margin="0,0,0,16">
+                <ItemsControl ItemsSource="{Binding Messages}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="5"
+                                    Padding="16"
+                                    CornerRadius="4"
+                                    BorderThickness="1"
+                                    BorderBrush="{DynamicResource SystemAccentColor}"
+                                    Background="{Binding Type, Converter={StaticResource MessageBackgroundConverter}}"
+                                    HorizontalAlignment="{Binding Type, Converter={StaticResource MessageAlignmentConverter}}">
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Type, Converter={StaticResource MessageRoleConverter}}" 
+                                             Foreground="{Binding Type, Converter={StaticResource MessageForegroundConverter}}"
+                                             FontWeight="Bold"
+                                             Margin="0,0,0,8"/>
+                                    <SelectableTextBlock Text="{Binding Content}" 
+                                                       TextWrapping="Wrap"
+                                                       Foreground="{Binding Type, Converter={StaticResource MessageForegroundConverter}}"/>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+
+            <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0"
+                         Text="{Binding UserInput}"
+                         Watermark="Type your message"
+                         Margin="0,0,16,0"
+                         IsEnabled="{Binding !IsRateLimited}">
+                    <TextBox.KeyBindings>
+                        <KeyBinding Gesture="Enter"
+                                  Command="{Binding SendMessageCommand}"/>
+                    </TextBox.KeyBindings>
+                </TextBox>
+                <Button Grid.Column="1"
+                        Command="{Binding SendMessageCommand}"
+                        IsEnabled="{Binding !IsBusy}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Send" Margin="8,0"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <ProgressBar IsIndeterminate="True"
+                    IsVisible="{Binding IsBusy}"
+                    VerticalAlignment="Top"/>
+    </Panel>
+</Window>

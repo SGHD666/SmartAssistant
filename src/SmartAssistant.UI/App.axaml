@@ -1,0 +1,16 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="using:SmartAssistant.UI.Converters"
+             xmlns:fluent="using:Avalonia.Controls.Fluent"
+             xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles"
+             x:Class="SmartAssistant.UI.App">
+    <Application.Styles>
+        <FluentTheme DensityStyle="Normal" />
+    </Application.Styles>
+
+    <Application.Resources>
+        <converters:MessageBackgroundConverter x:Key="MessageBackgroundConverter"/>
+        <converters:MessageAlignmentConverter x:Key="MessageAlignmentConverter"/>
+        <converters:MessageRoleConverter x:Key="MessageRoleConverter"/>
+    </Application.Resources>
+</Application>

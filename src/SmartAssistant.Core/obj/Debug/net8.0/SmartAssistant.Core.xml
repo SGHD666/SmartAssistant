@@ -1,0 +1,1029 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SmartAssistant.Core</name>
+    </assembly>
+    <members>
+        <member name="T:SmartAssistant.Core.Controllers.AssistantController">
+            <summary>
+            Controller class for handling user interactions with the smart assistant.
+            Coordinates between language model services and task execution.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Controllers.AssistantController.#ctor(SmartAssistant.Core.Services.LLM.ILanguageModelService,SmartAssistant.Core.Services.ITaskExecutionService,Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Controllers.AssistantController})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Controllers.AssistantController"/> class.
+            </summary>
+            <param name="languageModel">The language model service for processing user input.</param>
+            <param name="taskExecutor">The task execution service for performing actions.</param>
+            <param name="logger">The logger for recording controller operations.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Controllers.AssistantController.ProcessUserInputAsync(System.String)">
+            <summary>
+            Processes user input and executes appropriate actions.
+            </summary>
+            <param name="userInput">The user input to process.</param>
+            <returns>A task representing the asynchronous operation, containing the response message.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Controllers.AssistantController.GetResponseAsync(System.String)">
+            <summary>
+            Gets a response from the language model for the given user input.
+            </summary>
+            <param name="userInput">The user's input message.</param>
+            <returns>The assistant's response.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Models.AppSettings">
+            <summary>
+            Configuration settings for the SmartAssistant application.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.AppSettings.CurrentModel">
+            <summary>
+            Gets or sets the current selected model.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.AppSettings.ApiKey">
+            <summary>
+            Gets or sets the API key for the application.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.AppSettings.PythonPath">
+            <summary>
+            Gets or sets the path to the Python executable.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.AppSettings.BasePath">
+            <summary>
+            Gets or sets the base path for the SmartAssistant.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.AppSettings.DriverPath">
+            <summary>
+            Gets or sets the path to web drivers.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.AppSettings.ModelConfigs">
+            <summary>
+            Gets or sets the configurations for different language models.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Models.LLMConfig">
+            <summary>
+            Configuration for a specific language model.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.LLMConfig.Type">
+            <summary>
+            Gets or sets LLM Type.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.LLMConfig.LLMApiKey">
+            <summary>
+            Gets or sets the API key for the language model.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.LLMConfig.ModelId">
+            <summary>
+            Gets or sets the model identifier.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.LLMConfig.MaxTokens">
+            <summary>
+            Gets or sets the maximum number of tokens for the model.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.LLMConfig.Temperature">
+            <summary>
+            Gets or sets the temperature for response generation.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.LLMConfig.BaseUrl">
+            <summary>
+            Gets or sets the base URL for API requests.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Models.LLMType">
+            <summary>
+            Represents the different types of Language Learning Models (LLM) supported by the system.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Models.LLMType.OpenAI_GPT35">
+            <summary>
+            OpenAI's GPT-3.5 model.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Models.LLMType.OpenAI_GPT4">
+            <summary>
+            OpenAI's GPT-4 model.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Models.LLMType.Claude">
+            <summary>
+            Anthropic's Claude model.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Models.LLMType.QianWen">
+            <summary>
+            Baidu's QianWen model.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Models.ModelSettings">
+            <summary>
+            Configuration settings for language models used in the SmartAssistant.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.ModelSettings.CurrentModel">
+            <summary>
+            Gets or sets the type of the current language model.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.ModelSettings.ApiKey">
+            <summary>
+            Gets or sets the API key for accessing language model services.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.ModelSettings.PythonPath">
+            <summary>
+            Gets or sets the path to the Python executable.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.ModelSettings.BasePath">
+            <summary>
+            Gets or sets the base path for the language model.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.ModelSettings.ModelConfigs">
+            <summary>
+            Gets or sets the collection of available language model configurations.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Models.ModelSettings.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Models.ModelSettings"/> class.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Models.OpenAIServiceConfig">
+            <summary>
+            Configuration settings for the OpenAI service.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.OpenAIServiceConfig.ApiKey">
+            <summary>
+            Gets or sets the API key for OpenAI service.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.OpenAIServiceConfig.ModelId">
+            <summary>
+            Gets or sets the model ID (e.g., "gpt-3.5-turbo", "gpt-4").
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.OpenAIServiceConfig.Temperature">
+            <summary>
+            Gets or sets the temperature for response generation (0.0 to 1.0).
+            Higher values make output more random, lower values more deterministic.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.OpenAIServiceConfig.MaxTokens">
+            <summary>
+            Gets or sets the maximum number of tokens to generate.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Models.TaskDefinition">
+            <summary>
+            Defines a task to be executed by the smart assistant.
+            Contains information about the task's status, execution details, and results.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.Id">
+            <summary>
+            Gets or sets the unique identifier for the task.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.Description">
+            <summary>
+            Gets or sets the description of the task to be executed.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.Type">
+            <summary>
+            Gets or sets the type of the task (e.g., browser, system, file).
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.Status">
+            <summary>
+            Gets or sets the current status of the task (e.g., pending, running, completed).
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.CreatedAt">
+            <summary>
+            Gets or sets the UTC timestamp when the task was created.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.StartedAt">
+            <summary>
+            Gets or sets the UTC timestamp when the task was started.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.CompletedAt">
+            <summary>
+            Gets or sets the UTC timestamp when the task was completed.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.Result">
+            <summary>
+            Gets or sets the result message of the task execution.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Models.TaskDefinition.ErrorMessage">
+            <summary>
+            Gets or sets the error message if the task execution failed.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Program">
+            <summary>
+            The main program class for the SmartAssistant Core application.
+            This class contains the entry point for the application and sets up the core services.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Program.Main(System.String[])">
+            <summary>
+            The main entry point for the SmartAssistant Core application.
+            Configures and initializes the application's services and dependencies.
+            </summary>
+            <param name="args">Command-line arguments passed to the application.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation of the application.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.AutomationService">
+            <summary>
+            Service for handling automation tasks including browser and system operations.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExecuteBrowserTaskAsync(System.String)">
+            <summary>
+            Executes a browser task based on the provided task description.
+            </summary>
+            <param name="taskDescription">The description of the browser task to execute.</param>
+            <returns>A task representing the asynchronous operation, returning true if successful.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExecuteSystemTaskAsync(System.String)">
+            <summary>
+            Executes a system task based on the provided task description.
+            </summary>
+            <param name="taskDescription">The description of the system task to execute.</param>
+            <returns>A task representing the asynchronous operation, returning true if successful.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExecuteFileTaskAsync(System.String)">
+            <summary>
+            Executes a file task based on the provided task description.
+            </summary>
+            <param name="taskDescription">The description of the file task to execute.</param>
+            <returns>A task representing the asynchronous operation, returning true if successful.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ValidateTask(System.String)">
+            <summary>
+            Validates a task description and checks if it can be executed.
+            </summary>
+            <returns><see cref="T:System.Boolean"/> indicating whether the task can be executed.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.InitializeBrowserIfNeededAsync">
+            <summary>
+            Initializes the browser if it has not been initialized yet.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.NavigateToUrlAsync(System.String)">
+            <summary>
+            Navigates to a URL based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ClickElementAsync(System.String)">
+            <summary>
+            Clicks an element based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.TypeTextAsync(System.String)">
+            <summary>
+            Types text into an element based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.AdjustVolumeAsync(System.String)">
+            <summary>
+            Adjusts the system volume based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.AdjustBrightnessAsync(System.String)">
+            <summary>
+            Adjusts the monitor brightness based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.OpenFileAsync(System.String)">
+            <summary>
+            Opens a file based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.CopyFileAsync(System.String)">
+            <summary>
+            Copies a file based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.DeleteFileAsync(System.String)">
+            <summary>
+            Deletes a file based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.OpenYouTubeAsync(System.String)">
+            <summary>
+            Opens YouTube based on the provided task description.
+            </summary>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.InitializePythonDependencies">
+            <summary>
+            Initializes required Python dependencies.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ValidateTaskDescription(System.String)">
+            <summary>
+            Validates a task description.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExtractPattern(System.String,System.String)">
+            <summary>
+            Extracts a pattern from a string.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExtractElementText(System.String)">
+            <summary>
+            Extracts the text of an element from a task description.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExtractTypeInfo(System.String)">
+            <summary>
+            Extracts type information from a task description.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExtractFilePath(System.String)">
+            <summary>
+            Extracts a file path from a task description.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExtractFilePaths(System.String)">
+            <summary>
+            Extracts source and destination file paths from a task description.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationService.ExtractNumericValue(System.String)">
+            <summary>
+            Extracts a numeric value from a task description.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.AutomationException">
+            <summary>
+            Exception thrown when an automation task fails.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationException.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.AutomationException"/> class.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.AutomationException.#ctor(System.String,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.AutomationException"/> class.
+            </summary>
+            <param name="message">The error message that explains the reason for the exception.</param>
+            <param name="innerException">The exception that is the cause of the current exception.</param>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.IAutomationService">
+            <summary>
+            Interface defining automation services for executing various types of tasks.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IAutomationService.ExecuteBrowserTaskAsync(System.String)">
+            <summary>
+            Executes browser-related tasks such as opening websites or navigating URLs.
+            </summary>
+            <param name="taskDescription">The description of the browser task to execute.</param>
+            <returns>A task representing the asynchronous operation, returning true if successful.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IAutomationService.ExecuteSystemTaskAsync(System.String)">
+            <summary>
+            Executes system-related tasks such as adjusting volume or brightness.
+            </summary>
+            <param name="taskDescription">The description of the system task to execute.</param>
+            <returns>A task representing the asynchronous operation, returning true if successful.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IAutomationService.ExecuteFileTaskAsync(System.String)">
+            <summary>
+            Executes file-related tasks such as copying, moving, or deleting files.
+            </summary>
+            <param name="taskDescription">The description of the file task to execute.</param>
+            <returns>A task representing the asynchronous operation, returning true if successful.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IAutomationService.ValidateTask(System.String)">
+            <summary>
+            Validates a task description.
+            </summary>
+            <param name="taskDescription">The task description to validate.</param>
+            <returns>True if the task description is valid, false otherwise.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.IPythonRuntimeService">
+            <summary>
+            Interface for Python.NET runtime service.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IPythonRuntimeService.EnsureInitialized">
+            <summary>
+            Ensures Python.NET runtime is initialized.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IPythonRuntimeService.ExecuteCodeAsync(System.String)">
+            <summary>
+            Executes Python code using Python.NET runtime.
+            </summary>
+            <param name="code">Python code to execute.</param>
+            <returns>Result of the execution.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IPythonRuntimeService.Shutdown">
+            <summary>
+            Finalizes the Python.NET runtime.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.IPythonScriptExecutor">
+            <summary>
+            Interface for executing Python scripts and managing Python dependencies.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IPythonScriptExecutor.ExecuteScriptAsync(System.String)">
+            <summary>
+            Executes a Python script asynchronously.
+            </summary>
+            <param name="scriptContent">The content of the Python script to execute.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IPythonScriptExecutor.ExecuteScriptWithOutputAsync(System.String)">
+            <summary>
+            Executes a Python script and returns its output asynchronously.
+            </summary>
+            <param name="scriptContent">The content of the Python script to execute.</param>
+            <returns>A task representing the asynchronous operation, containing the script's output.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.IPythonScriptExecutor.InstallDependenciesAsync(System.String[])">
+            <summary>
+            Installs Python package dependencies using pip.
+            </summary>
+            <param name="packages">Array of package names to install.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.ITaskExecutionService">
+            <summary>
+            Interface for managing and executing tasks in the smart assistant.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.ITaskExecutionService.ExecuteTaskAsync(System.String)">
+            <summary>
+            Executes a task based on the provided description.
+            </summary>
+            <param name="taskDescription">The description of the task to execute.</param>
+            <returns>A task representing the asynchronous operation, with a boolean indicating success.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.ITaskExecutionService.GetTaskStatusAsync(System.String)">
+            <summary>
+            Gets the current status of a task.
+            </summary>
+            <param name="taskId">The unique identifier of the task.</param>
+            <returns>A task representing the asynchronous operation, containing the task status.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.ITaskExecutionService.CancelTaskAsync(System.String)">
+            <summary>
+            Cancels a running task.
+            </summary>
+            <param name="taskId">The unique identifier of the task to cancel.</param>
+            <returns>A task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.ITaskExecutionService.GetTaskHistoryAsync">
+            <summary>
+            Retrieves the execution history of all tasks.
+            </summary>
+            <returns>A task representing the asynchronous operation, containing the task history.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.ClaudeService">
+            <summary>
+            Service for interacting with Anthropic's Claude language model.
+            Implements the ILanguageModelService interface to provide Claude AI capabilities.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ClaudeService.httpClient">
+            <summary>
+            The HTTP client for making API requests.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ClaudeService.config">
+            <summary>
+            The configuration settings for the Claude service.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ClaudeService.rateLimiter">
+            <summary>
+            The rate limiter for limiting API requests.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ClaudeService._logger">
+            <summary>
+            The logger for logging warnings and errors.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ClaudeService._isConfigured">
+            <summary>
+            A flag indicating whether the service is properly configured.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ClaudeService.#ctor(Microsoft.Extensions.Options.IOptions{SmartAssistant.Core.Models.ModelSettings},Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Services.LLM.ClaudeService})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.LLM.ClaudeService"/> class.
+            </summary>
+            <param name="settings">The model settings containing API configuration.</param>
+            <param name="logger">The logger for logging warnings and errors.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when settings is null.</exception>
+        </member>
+        <member name="P:SmartAssistant.Core.Services.LLM.ClaudeService.Config">
+            <summary>
+            Gets the current LLM configuration.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ClaudeService.GenerateResponseAsync(System.String)">
+            <summary>
+            Generates a response from the Claude model based on the provided prompt.
+            </summary>
+            <param name="prompt">The input prompt to send to the model.</param>
+            <returns>A task representing the asynchronous operation, containing the generated response.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ClaudeService.AnalyzeIntentAsync(System.String)">
+            <summary>
+            Analyzes the intent of user input using the Claude model.
+            </summary>
+            <param name="userInput">The user input to analyze.</param>
+            <returns>A task representing the asynchronous operation, containing the analyzed intent.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ClaudeService.ValidateTaskAsync(System.String)">
+            <summary>
+            Validates if a given task is safe and appropriate to execute.
+            </summary>
+            <param name="task">The task description to validate.</param>
+            <returns>A task representing the asynchronous operation, containing true if the task is valid, false otherwise.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ClaudeService.AnalyzeTaskAsync(System.String)">
+            <summary>
+            Analyzes a task into specific executable tasks.
+            </summary>
+            <param name="command">The command to analyze.</param>
+            <returns>A task representing the asynchronous operation, containing the analyzed tasks.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.ILanguageModelService">
+            <summary>
+            Interface defining the contract for language model services.
+            Provides methods for generating responses, analyzing intents, and validating tasks.
+            </summary>
+        </member>
+        <member name="P:SmartAssistant.Core.Services.LLM.ILanguageModelService.Config">
+            <summary>
+            Gets the configuration settings for the language model.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ILanguageModelService.GenerateResponseAsync(System.String)">
+            <summary>
+            Generates a response based on the provided prompt.
+            </summary>
+            <param name="prompt">The input prompt to generate a response for.</param>
+            <returns>A task that represents the asynchronous operation, containing the generated response.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ILanguageModelService.AnalyzeIntentAsync(System.String)">
+            <summary>
+            Analyzes the intent behind the provided user input.
+            </summary>
+            <param name="userInput">The user input to analyze.</param>
+            <returns>A task that represents the asynchronous operation, containing the analyzed intent.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ILanguageModelService.AnalyzeTaskAsync(System.String)">
+            <summary>
+            Analyzes a user command and breaks it down into executable subtasks.
+            </summary>
+            <param name="command">The command to analyze.</param>
+            <returns>A list of subtask descriptions that can be executed by the automation service.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ILanguageModelService.ValidateTaskAsync(System.String)">
+            <summary>
+            Validates whether a given task can be executed by the language model.
+            </summary>
+            <param name="task">The task to validate.</param>
+            <returns>A task that represents the asynchronous operation, containing a boolean indicating whether the task is valid.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.ILLMFactory">
+            <summary>
+            Factory interface for creating language model service instances.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ILLMFactory.CreateService(SmartAssistant.Core.Models.LLMType)">
+            <summary>
+            Creates a language model service instance of the specified type.
+            </summary>
+            <param name="type">The type of language model service to create.</param>
+            <returns>An instance of <see cref="T:SmartAssistant.Core.Services.LLM.ILanguageModelService"/> for the specified model type.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.ILLMService">
+            <summary>
+            Interface for interacting with Language Learning Models (LLMs).
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ILLMService.GenerateResponseAsync(System.String)">
+            <summary>
+            Generates a response from the language model based on the provided prompt.
+            </summary>
+            <param name="prompt">The input prompt to send to the language model.</param>
+            <returns>A task representing the asynchronous operation, containing the generated response.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.IQianWenService">
+            <summary>
+            Interface specific to the QianWen language model service.
+            Extends the base language model service interface with QianWen-specific functionality.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.LLMFactory">
+            <summary>
+            Factory class for creating language model service instances.
+            Implements the ILLMFactory interface to provide service creation functionality.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.LLMFactory.#ctor(System.IServiceProvider,System.Collections.Generic.IEnumerable{SmartAssistant.Core.Services.LLM.ILanguageModelService})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.LLM.LLMFactory"/> class.
+            </summary>
+            <param name="serviceProvider">The service provider for dependency injection.</param>
+            <param name="languageModelServices">The collection of available language model services.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.LLMFactory.CreateService(SmartAssistant.Core.Models.LLMType)">
+            <summary>
+            Creates a language model service instance of the specified type.
+            </summary>
+            <param name="type">The type of language model service to create.</param>
+            <returns>An instance of <see cref="T:SmartAssistant.Core.Services.LLM.ILanguageModelService"/> for the specified model type.</returns>
+            <exception cref="T:System.ArgumentException">Thrown when no service is found for the specified type.</exception>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.ModelManager">
+            <summary>
+            Manages language model services and handles model switching and response generation.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ModelManager.switchLock">
+            <summary>
+            Lock object for thread-safe model switching.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ModelManager.factory">
+            <summary>
+            Factory for creating language model service instances.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ModelManager.modelSettings">
+            <summary>
+            Settings for configuring language models.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ModelManager.currentService">
+            <summary>
+            Currently active language model service.
+            </summary>
+        </member>
+        <member name="F:SmartAssistant.Core.Services.LLM.ModelManager._retryPolicy">
+            <summary>
+            Retry policy for rate limit handling.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.#ctor(SmartAssistant.Core.Models.ModelSettings,SmartAssistant.Core.Services.LLM.ILLMFactory)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.LLM.ModelManager"/> class.
+            </summary>
+            <param name="modelSettings">The settings for configuring language models.</param>
+            <param name="factory">The factory for creating language model service instances.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when factory or modelSettings is null.</exception>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.GenerateResponseAsync(System.String)">
+            <summary>
+            Generates a response to the given prompt using the current language model.
+            </summary>
+            <param name="prompt">The prompt to generate a response for.</param>
+            <returns>A task that represents the asynchronous operation.</returns>
+            <exception cref="T:System.ArgumentException">Thrown when prompt is empty.</exception>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.SwitchModel(SmartAssistant.Core.Models.LLMType)">
+            <summary>
+            Switches to the specified language model.
+            </summary>
+            <param name="modelType">The type of the language model to switch to.</param>
+            <exception cref="T:System.ArgumentException">Thrown when configuration not found for model type.</exception>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.InitializeService">
+            <summary>
+            Initializes the language model service.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.ValidateConfiguration">
+            <summary>
+            Validates the language model configuration.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.EnsureServiceInitialized">
+            <summary>
+            Ensures the language model service is initialized.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.ModelManager.TryFallbackModel">
+            <summary>
+            Tries to switch to a fallback language model if the current one is failing.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.OpenAIService">
+            <summary>
+            Service for interacting with OpenAI's language models.
+            Implements the ILanguageModelService interface to provide GPT-3.5 and GPT-4 capabilities.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.OpenAIService.#ctor(Microsoft.Extensions.Options.IOptions{SmartAssistant.Core.Models.OpenAIServiceConfig},Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Services.LLM.OpenAIService})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.LLM.OpenAIService"/> class.
+            </summary>
+            <param name="config">The OpenAI service configuration.</param>
+            <param name="logger">The logger instance.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown when config or logger is null.</exception>
+        </member>
+        <member name="P:SmartAssistant.Core.Services.LLM.OpenAIService.Config">
+            <summary>
+            Gets the current LLM configuration.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.OpenAIService.GenerateResponseAsync(System.String)">
+            <summary>
+            Generates a response from the OpenAI model based on the provided prompt.
+            </summary>
+            <param name="prompt">The input prompt to send to the model.</param>
+            <returns>A task representing the asynchronous operation, containing the generated response.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.OpenAIService.AnalyzeIntentAsync(System.String)">
+            <summary>
+            Analyzes the intent of user input using the OpenAI model.
+            </summary>
+            <param name="userInput">The user input to analyze.</param>
+            <returns>A task representing the asynchronous operation, containing the analyzed intent.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.OpenAIService.ValidateTaskAsync(System.String)">
+            <summary>
+            Validates if a given task is safe and appropriate to execute.
+            </summary>
+            <param name="task">The task description to validate.</param>
+            <returns>A task representing the asynchronous operation, containing true if the task is valid, false otherwise.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.QianWenService">
+            <summary>
+            Service implementation for interacting with the QianWen language model.
+            Provides functionality for text generation and language model interactions.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.QianWenService.#ctor(Microsoft.Extensions.Options.IOptions{SmartAssistant.Core.Models.ModelSettings},Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Services.LLM.QianWenService})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.LLM.QianWenService"/> class.
+            </summary>
+            <param name="settings">Configuration settings for the QianWen language model service.</param>
+            <param name="logger">Logger instance for logging messages and events in the QianWen service.</param>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.RateLimiter">
+            <summary>
+            Provides rate limiting functionality for API calls.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.RateLimiter.ExecuteWithRateLimitingAsync``1(System.String,System.Func{System.Threading.Tasks.Task{``0}})">
+            <summary>
+            Executes an action with rate limiting applied.
+            </summary>
+            <typeparam name="T">The return type of the action.</typeparam>
+            <param name="modelId">The model identifier for rate limiting.</param>
+            <param name="action">The action to execute.</param>
+            <returns>The result of the action.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.RateLimiter.SetModelLimit(System.String,System.Int32)">
+            <summary>
+            Sets the rate limit for a specific model.
+            </summary>
+            <param name="modelId">The model identifier.</param>
+            <param name="requestsPerHour">The number of requests allowed per hour.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.RateLimiter.GetRemainingRequests(System.String)">
+            <summary>
+            Gets the remaining requests for a specific model.
+            </summary>
+            <param name="modelId">The model identifier.</param>
+            <returns>The number of remaining requests in the current hour.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.RateLimiter.GetTimeUntilReset(System.String)">
+            <summary>
+            Gets the time until rate limit reset for a specific model.
+            </summary>
+            <param name="modelId">The model identifier.</param>
+            <returns>The time remaining until the rate limit resets.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.LLM.RateLimitExceededException">
+            <summary>
+            Exception thrown when a rate limit is exceeded.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.LLM.RateLimitExceededException.#ctor(System.String,System.TimeSpan,System.Exception)">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.LLM.RateLimitExceededException"/> class.
+            </summary>
+            <param name="message">The error message.</param>
+            <param name="retryAfter">The time to wait before retrying.</param>
+            <param name="innerException">The inner exception.</param>
+        </member>
+        <member name="P:SmartAssistant.Core.Services.LLM.RateLimitExceededException.RetryAfter">
+            <summary>
+            Gets the time to wait before retrying.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.PythonRuntimeService">
+            <summary>
+            Service for managing Python.NET runtime initialization and execution.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonRuntimeService.#ctor(System.String,Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Services.PythonRuntimeService})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.PythonRuntimeService"/> class.
+            </summary>
+            <param name="pythonPath">Path to Python installation.</param>
+            <param name="logger">Logger instance.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonRuntimeService.EnsureInitialized">
+            <summary>
+            Ensures Python.NET runtime is initialized.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonRuntimeService.ExecuteCodeAsync(System.String)">
+            <summary>
+            Executes Python code using Python.NET runtime.
+            </summary>
+            <param name="code">Python code to execute.</param>
+            <returns>Result of the execution.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonRuntimeService.Shutdown">
+            <summary>
+            Finalizes the Python.NET runtime.
+            </summary>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.PythonScriptExecutor">
+            <summary>
+            Service for executing Python scripts and managing Python dependencies.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonScriptExecutor.#ctor(System.String,System.String,Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Services.PythonScriptExecutor})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.PythonScriptExecutor"/> class.
+            </summary>
+            <param name="pythonPath">Path to the Python executable.</param>
+            <param name="scriptsDirectory">Directory to store temporary Python scripts.</param>
+            <param name="logger">Logger instance for logging execution details.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonScriptExecutor.ExecuteScriptAsync(System.String)">
+            <summary>
+            Executes a Python script asynchronously.
+            </summary>
+            <param name="scriptContent">Content of the Python script to execute.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+            <exception cref="T:System.Exception">Thrown when the Python script execution fails.</exception>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonScriptExecutor.ExecuteScriptWithOutputAsync(System.String)">
+            <summary>
+            Executes a Python script asynchronously and returns the output.
+            </summary>
+            <param name="scriptContent">Content of the Python script to execute.</param>
+            <returns>Output of the Python script.</returns>
+            <exception cref="T:System.Exception">Thrown when the Python script execution fails.</exception>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonScriptExecutor.InstallDependenciesAsync(System.String[])">
+            <summary>
+            Installs Python dependencies asynchronously.
+            </summary>
+            <param name="packages">Array of package names to install.</param>
+            <exception cref="T:System.Exception">Thrown when the package installation fails.</exception>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.PythonScriptExecutor.SaveScriptToFileAsync(System.String)">
+            <summary>
+            Saves a Python script to a temporary file asynchronously.
+            </summary>
+            <param name="scriptContent">Content of the Python script to save.</param>
+            <returns>Path to the temporary script file.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.Services.TaskExecutionService">
+            <summary>
+            Service responsible for managing and executing tasks within the SmartAssistant system.
+            Handles task lifecycle, execution, and history tracking.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.#ctor(SmartAssistant.Core.Services.LLM.ILanguageModelService,SmartAssistant.Core.Services.IAutomationService,Microsoft.Extensions.Logging.ILogger{SmartAssistant.Core.Services.TaskExecutionService})">
+            <summary>
+            Initializes a new instance of the <see cref="T:SmartAssistant.Core.Services.TaskExecutionService"/> class.
+            </summary>
+            <param name="languageModel">The language model service for task processing.</param>
+            <param name="automationService">The automation service for executing tasks.</param>
+            <param name="logger">The logger for recording service operations.</param>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.ExecuteTaskAsync(System.String)">
+            <summary>
+            Executes a task based on the provided task description.
+            </summary>
+            <param name="taskDescription">The description of the task to execute.</param>
+            <returns>A boolean indicating whether the task was executed successfully.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.ExecuteCommandAsync(System.String)">
+            <summary>
+            Executes a command based on the provided command string.
+            </summary>
+            <param name="command">The command string to execute.</param>
+            <returns>A boolean indicating whether the command was executed successfully.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.DetermineTaskType(System.String)">
+            <summary>
+            Determines the type of task based on the provided task description.
+            </summary>
+            <param name="taskDescription">The description of the task to determine the type for.</param>
+            <returns>The type of task as a string.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.ContainsBrowserKeywords(System.String)">
+            <summary>
+            Checks if the task description contains browser-related keywords.
+            </summary>
+            <param name="task">The task description to check.</param>
+            <returns>A boolean indicating whether the task description contains browser-related keywords.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.ContainsSystemKeywords(System.String)">
+            <summary>
+            Checks if the task description contains system-related keywords.
+            </summary>
+            <param name="task">The task description to check.</param>
+            <returns>A boolean indicating whether the task description contains system-related keywords.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.ContainsFileKeywords(System.String)">
+            <summary>
+            Checks if the task description contains file-related keywords.
+            </summary>
+            <param name="task">The task description to check.</param>
+            <returns>A boolean indicating whether the task description contains file-related keywords.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.GetTaskStatusAsync(System.String)">
+            <summary>
+            Retrieves the status of a task based on the provided task ID.
+            </summary>
+            <param name="taskId">The ID of the task to retrieve the status for.</param>
+            <returns>The status of the task as a string.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.GetTaskHistoryAsync">
+            <summary>
+            Retrieves the history of tasks.
+            </summary>
+            <returns>The history of tasks as a JSON string.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.CancelTaskAsync(System.String)">
+            <summary>
+            Cancels a task based on the provided task ID.
+            </summary>
+            <param name="taskId">The ID of the task to cancel.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:SmartAssistant.Core.Services.TaskExecutionService.GetActiveTasksInternal">
+            <summary>
+            Retrieves the active tasks.
+            </summary>
+            <returns>A collection of active tasks.</returns>
+        </member>
+        <member name="T:SmartAssistant.Core.SmartAssistantCoreExtensions">
+            <summary>
+            SmartAssistantCoreExtensions.
+            </summary>
+        </member>
+        <member name="M:SmartAssistant.Core.SmartAssistantCoreExtensions.AddSmartAssistantCore(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Adds the SmartAssistant core services.
+            </summary>
+            <param name="services">The services.</param>
+            <param name="configuration">The configuration.</param>
+            <returns>IServiceCollection.</returns>
+        </member>
+    </members>
+</doc>
