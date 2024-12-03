@@ -150,6 +150,12 @@
   - 简单属性
   - 框架生成的代码
 
+### Recent Updates
+- **Unit Test Improvements**:
+  - Enhanced mocking strategies for `ModelManager` and `AssistantController`.
+  - Ensured all dependencies are properly mocked using Moq.
+  - Achieved 100% pass rate for all unit tests in `MainWindowViewModelTests`.
+
 ## 开发流程
 
 1. 新功能开发
