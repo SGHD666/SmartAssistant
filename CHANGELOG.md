@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.1.3] - 2024-02-09
+
+### 改进
+- 增强了 `ModelManager` 和 `AssistantController` 的单元测试模拟策略。
+- 在 `MainWindowViewModelTests` 中实现了 100% 的测试通过率。
+
+### 技术细节
+- 更新了开发指南以反映最近的单元测试改进。
+
 ## [v0.1.2] - 2024-02-08
 
 ### Added
