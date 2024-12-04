@@ -145,6 +145,113 @@ public class ModelInfo
 }
 ```
 
+## UI Components
+
+### Value Converters
+
+SmartAssistant uses several value converters to transform data for UI display. All converters implement `IValueConverter` and follow a consistent pattern.
+
+#### IconConverter
+
+Converts boolean values to Material Design icons for chat messages.
+
+```csharp
+public class IconConverter : IValueConverter
+{
+    // True -> Person icon (user)
+    // False -> Robot icon (assistant)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture);
+}
+```
+
+#### IconColorConverter
+
+Converts boolean values to color brushes for chat message icons.
+
+```csharp
+public class IconColorConverter : IValueConverter
+{
+    // True -> Warm blue (#4A90E2) for user
+    // False -> Tech cyan (#00B8D4) for assistant
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture);
+}
+```
+
+#### LLMTypeConverter
+
+Converts between LLMType enum values and their display strings.
+
+```csharp
+public class LLMTypeConverter : IValueConverter
+{
+    // Enum -> Display string mapping:
+    // OpenAI_GPT35 -> "GPT-3.5"
+    // OpenAI_GPT4 -> "GPT-4"
+    // Claude -> "Claude"
+    // QianWen -> "QianWen"
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture);
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo? culture);
+}
+```
+
+#### MessageAlignmentConverter
+
+Converts boolean values to horizontal alignment values for chat message layout.
+
+```csharp
+public class MessageAlignmentConverter : IValueConverter
+{
+    // True -> HorizontalAlignment.Right (user messages)
+    // False -> HorizontalAlignment.Left (assistant messages)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture);
+}
+```
+
+#### MessageForegroundConverter
+
+Converts MessageType enum values to appropriate foreground colors.
+
+```csharp
+public class MessageForegroundConverter : IValueConverter
+{
+    // MessageType.Error -> Red
+    // MessageType.System -> Gray
+    // Default -> Black
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture);
+}
+```
+
+#### MessageRoleConverter
+
+Converts boolean values to message role strings in the chat interface.
+
+```csharp
+public class MessageRoleConverter : IValueConverter
+{
+    // True -> "You" (user messages)
+    // False -> "Assistant" (assistant messages)
+    // Invalid -> "Unknown"
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo? culture);
+}
+```
+
+### Common Converter Patterns
+
+All UI converters in SmartAssistant follow these patterns:
+
+1. **Nullability**: All converters properly handle null values and use nullable reference types
+2. **ConvertBack**: Most converters do not support back-conversion and throw `NotImplementedException`
+3. **Default Values**: Converters provide sensible defaults when input is invalid
+4. **Type Safety**: Converters use explicit type checking before conversion
+
+### Usage Example
+
+```xaml
+<TextBlock Text="{Binding IsUserMessage, Converter={StaticResource MessageRoleConverter}}"
+           Foreground="{Binding MessageType, Converter={StaticResource MessageForegroundConverter}}"
+           HorizontalAlignment="{Binding IsUserMessage, Converter={StaticResource MessageAlignmentConverter}}"/>
+```
+
 ## Usage Examples
 
 ### Task Execution
