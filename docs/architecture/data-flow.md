@@ -1,10 +1,12 @@
-# Data Flow
+# Data Flow | 数据流
 
 This document describes the flow of data through the SmartAssistant system.
+本文档描述了 SmartAssistant 系统中的数据流。
 
-## Overview
+## Overview | 概述
 
 SmartAssistant processes data through several key stages:
+SmartAssistant 通过以下几个关键阶段处理数据：
 
 ```mermaid
 graph LR
@@ -17,9 +19,9 @@ graph LR
     VM --> UI
 ```
 
-## Input Processing Flow
+## Input Processing Flow | 输入处理流程
 
-### 1. User Input Capture
+### 1. User Input Capture | 用户输入捕获
 ```mermaid
 graph TD
     UI[User Interface] -->|Raw Input| VM[View Model]
@@ -28,11 +30,15 @@ graph TD
 ```
 
 - User enters text or command
+  用户输入文本或命令
 - Input is captured by UI controls
+  UI 控件捕获输入
 - View Model processes and validates input
+  视图模型处理并验证输入
 - Task Service receives formatted command
+  任务服务接收格式化的命令
 
-### 2. LLM Processing
+### 2. LLM Processing | LLM 处理
 ```mermaid
 graph TD
     LLM[LLM Service] -->|Parse Intent| AN[Analysis]
@@ -41,11 +47,15 @@ graph TD
 ```
 
 - LLM analyzes user intent
+  LLM 分析用户意图
 - Generates execution plan
+  生成执行计划
 - Breaks down into subtasks
+  分解为子任务
 - Validates task sequence
+  验证任务序列
 
-### 3. Task Execution
+### 3. Task Execution | 任务执行
 ```mermaid
 graph TD
     TS[Task Service] -->|Execute| AS[Automation Service]
@@ -55,13 +65,17 @@ graph TD
 ```
 
 - Tasks converted to system commands
+  任务转换为系统命令
 - Commands executed sequentially
+  按顺序执行命令
 - Results captured and processed
+  捕获并处理结果
 - Status updates provided
+  提供状态更新
 
-## Response Flow
+## Response Flow | 响应流程
 
-### 1. Result Collection
+### 1. Result Collection | 结果收集
 ```mermaid
 graph TD
     AS[Automation Service] -->|Raw Results| TS[Task Service]
@@ -70,10 +84,13 @@ graph TD
 ```
 
 - Command execution results gathered
+  收集命令执行结果
 - Results processed and validated
+  处理并验证结果
 - Output formatted for display
+  格式化输出以供显示
 
-### 2. Status Updates
+### 2. Status Updates | 状态更新
 ```mermaid
 graph TD
     TS[Task Service] -->|Status| VM[View Model]
@@ -82,22 +99,26 @@ graph TD
 ```
 
 - Real-time status updates
+  实时状态更新
 - Progress indicators
+  进度指示器
 - Error notifications
+  错误通知
 - Completion status
+  完成状态
 
-## Data Types
+## Data Types | 数据类型
 
-### Input Data
+### Input Data | 输入数据
 ```typescript
 interface UserInput {
-    rawText: string;
-    timestamp: DateTime;
-    context?: object;
+    rawText: string;      // 原始文本
+    timestamp: DateTime;   // 时间戳
+    context?: object;     // 上下文（可选）
 }
 ```
 
-### LLM Data
+### LLM Data | LLM 数据
 ```typescript
 interface LLMRequest {
     input: string;
@@ -114,7 +135,7 @@ interface LLMResponse {
 }
 ```
 
-### Task Data
+### Task Data | 任务数据
 ```typescript
 interface Task {
     id: string;
@@ -126,7 +147,7 @@ interface Task {
 }
 ```
 
-### Command Data
+### Command Data | 命令数据
 ```typescript
 interface Command {
     name: string;
@@ -136,9 +157,9 @@ interface Command {
 }
 ```
 
-## State Management
+## State Management | 状态管理
 
-### View Model State
+### View Model State | 视图模型状态
 ```typescript
 interface ViewModelState {
     input: string;
@@ -149,7 +170,7 @@ interface ViewModelState {
 }
 ```
 
-### Task Service State
+### Task Service State | 任务服务状态
 ```typescript
 interface TaskServiceState {
     activeTasks: Map<string, Task>;
@@ -158,9 +179,9 @@ interface TaskServiceState {
 }
 ```
 
-## Error Flow
+## Error Flow | 错误流程
 
-### Error Handling
+### Error Handling | 错误处理
 ```mermaid
 graph TD
     ER[Error] -->|Capture| EH[Error Handler]
@@ -170,11 +191,15 @@ graph TD
 ```
 
 - Errors captured at each stage
+  捕获每个阶段的错误
 - Logged for debugging
+  日志记录用于调试
 - User-friendly messages generated
+  生成用户友好的消息
 - Appropriate UI updates
+  适当的 UI 更新
 
-### Recovery Flow
+### Recovery Flow | 恢复流程
 ```mermaid
 graph TD
     EH[Error Handler] -->|Analyze| AN[Analysis]
@@ -184,13 +209,17 @@ graph TD
 ```
 
 - Error analysis
+  错误分析
 - Recovery attempt if possible
+  尝试恢复如果可能
 - Graceful degradation
+  优雅降级
 - User notification
+  用户通知
 
-## Data Persistence
+## Data Persistence | 数据持久化
 
-### Storage Types
+### Storage Types | 存储类型
 1. **Temporary Storage**
    - In-memory cache
    - Session state
@@ -201,7 +230,7 @@ graph TD
    - User preferences
    - Task history
 
-### Storage Flow
+### Storage Flow | 存储流程
 ```mermaid
 graph TD
     AP[Application] -->|Write| CS[Cache Store]
@@ -210,7 +239,7 @@ graph TD
     PS -->|Load| AP
 ```
 
-## Related Documentation
-- [System Architecture](./system-architecture.md)
-- [API Documentation](../api/core-services.md)
-- [Development Guidelines](../guides/development-guidelines.md)
+## Related Documentation | 相关文档
+- [System Architecture | 系统架构](/docs/architecture/system-architecture.md)
+- [API Documentation | API 文档](/docs/api/core-services.md)
+- [Development Guidelines | 开发指南](/docs/guides/development-guidelines.md)

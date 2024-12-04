@@ -1,8 +1,10 @@
-# Core Services API Documentation
+# Core Services API Documentation | 核心服务 API 文档
 
-## Task Execution Service
+## Task Execution Service | 任务执行服务
 
 The Task Execution Service is responsible for managing and executing user tasks.
+
+任务执行服务负责管理和执行用户任务。
 
 ### ITaskExecutionService
 
@@ -15,29 +17,41 @@ public interface ITaskExecutionService
 }
 ```
 
-#### Methods
+#### Methods | 方法
 
 ##### ExecuteAsync
 Executes a task based on user input.
-- **Parameters**
-  - `input`: User input string
-  - `cancellationToken`: Optional cancellation token
-- **Returns**: `ExecutionResult` containing task outcome
+根据用户输入执行任务。
+
+**Parameters | 参数:**
+- `input`: The user's task input | 用户的任务输入
+- `cancellationToken`: Optional cancellation token | 可选的取消令牌
+
+**Returns | 返回:**
+- `ExecutionResult`: Result of the task execution | 任务执行结果
 
 ##### GetStatusAsync
-Retrieves the current status of a task.
-- **Parameters**
-  - `taskId`: Unique identifier of the task
-- **Returns**: Current `ExecutionStatus`
+Gets the current status of a task.
+获取任务的当前状态。
+
+**Parameters | 参数:**
+- `taskId`: ID of the task | 任务ID
+
+**Returns | 返回:**
+- `ExecutionStatus`: Current status of the task | 任务的当前状态
 
 ##### CancelAsync
 Cancels a running task.
-- **Parameters**
-  - `taskId`: Unique identifier of the task to cancel
+取消正在运行的任务。
 
-## LLM Services
+**Parameters | 参数:**
+- `taskId`: ID of the task to cancel | 要取消的任务ID
+
+## LLM Services | LLM 服务
 
 Services for interacting with various Language Learning Models.
+
+LLM 服务处理与语言模型的交互。
 
 ### ILLMService
 
@@ -50,27 +64,39 @@ public interface ILLMService
 }
 ```
 
-#### Methods
+#### Methods | 方法
 
 ##### ProcessAsync
 Processes user input through the LLM.
-- **Parameters**
-  - `input`: User input to process
-- **Returns**: `LLMResponse` containing model's response
+使用语言模型处理用户输入。
+
+**Parameters | 参数:**
+- `input`: User input to process | 要处理的用户输入
+
+**Returns | 返回:**
+- `LLMResponse`: Response from the LLM | LLM 的响应
 
 ##### IsAvailableAsync
 Checks if the LLM service is available.
-- **Returns**: Boolean indicating availability
+检查 LLM 服务是否可用。
 
-#### Properties
+**Returns | 返回:**
+- `bool`: True if the service is available | 如果服务可用则为 true
+
+#### Properties | 属性
 
 ##### Type
 Gets the type of LLM service.
-- **Type**: `LLMType` enum
+获取 LLM 服务类型。
 
-## Automation Service
+**Type | 类型:**
+- `LLMType`: Type of the LLM service | LLM 服务类型
+
+## Automation Service | 自动化服务
 
 Handles system automation and command execution.
+
+自动化服务处理系统自动化任务。
 
 ### IAutomationService
 
@@ -83,26 +109,37 @@ public interface IAutomationService
 }
 ```
 
-#### Methods
+#### Methods | 方法
 
 ##### ExecuteCommandAsync
 Executes a system command.
-- **Parameters**
-  - `command`: Command to execute
-  - `args`: Command arguments
-- **Returns**: `CommandResult` with execution outcome
+执行系统命令。
+
+**Parameters | 参数:**
+- `command`: Command to execute | 要执行的命令
+- `args`: Command arguments | 命令参数
+
+**Returns | 返回:**
+- `CommandResult`: Result of the command execution | 命令执行结果
 
 ##### IsCommandAvailableAsync
 Checks if a command is available.
-- **Parameters**
-  - `command`: Command to check
-- **Returns**: Boolean indicating availability
+检查命令是否可用。
+
+**Parameters | 参数:**
+- `command`: Command to check | 要检查的命令
+
+**Returns | 返回:**
+- `bool`: True if the command is available | 如果命令可用则为 true
 
 ##### GetAvailableCommands
 Lists all available commands.
-- **Returns**: Collection of command names
+列出所有可用的命令。
 
-## Data Types
+**Returns | 返回:**
+- `IEnumerable<string>`: Collection of available commands | 可用命令集合
+
+## Data Types | 数据类型
 
 ### ExecutionResult
 
@@ -122,11 +159,11 @@ public class ExecutionResult
 ```csharp
 public enum ExecutionStatus
 {
-    Pending,
-    Running,
-    Completed,
-    Failed,
-    Cancelled
+    Pending,    // 待处理
+    Running,    // 运行中
+    Completed,  // 已完成
+    Failed,     // 失败
+    Cancelled   // 已取消
 }
 ```
 
@@ -154,9 +191,9 @@ public class CommandResult
 }
 ```
 
-## Usage Examples
+## Usage Examples | 使用示例
 
-### Task Execution
+### Task Execution | 任务执行
 
 ```csharp
 public class ExampleUsage
@@ -179,7 +216,7 @@ public class ExampleUsage
 }
 ```
 
-### LLM Integration
+### LLM Integration | LLM 集成
 
 ```csharp
 public class LLMExample
@@ -197,7 +234,7 @@ public class LLMExample
 }
 ```
 
-### Command Execution
+### Command Execution | 命令执行
 
 ```csharp
 public class AutomationExample
@@ -217,11 +254,11 @@ public class AutomationExample
 }
 ```
 
-## Error Handling
+## Error Handling | 错误处理
 
 Services use a combination of exceptions and result objects for error handling:
 
-### Common Exceptions
+### Common Exceptions | 公共异常
 
 ```csharp
 public class TaskExecutionException : Exception
@@ -242,7 +279,7 @@ public class AutomationException : Exception
 }
 ```
 
-## Related Documentation
-- [System Architecture](../architecture/system-architecture.md)
-- [Development Guidelines](../guides/development-guidelines.md)
-- [Testing Guide](../guides/testing.md)
+## Related Documentation | 相关文档
+- [System Architecture | 系统架构](/docs/architecture/system-architecture.md)
+- [Development Guidelines | 开发指南](/docs/guides/development-guidelines.md)
+- [Testing Guide | 测试指南](/docs/guides/testing.md)
