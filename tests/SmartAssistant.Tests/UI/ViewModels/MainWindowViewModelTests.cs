@@ -1,5 +1,3 @@
-using System;
-using System.Threading.Tasks;
 using FluentAssertions;
 using SmartAssistant.UI.ViewModels;
 using Xunit;
@@ -8,7 +6,6 @@ using SmartAssistant.Core.Controllers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using SmartAssistant.Core.Services.LLM;
-using SmartAssistant.Core.Models;
 using SmartAssistant.Core.Services; // Added using statement for LLMType
 
 namespace SmartAssistant.Tests.UI.ViewModels

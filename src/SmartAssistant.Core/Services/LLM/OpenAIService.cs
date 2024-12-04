@@ -23,8 +23,9 @@ namespace SmartAssistant.Core.Services.LLM
         private readonly OpenAIServiceConfig config;
         private readonly OpenAIAPI api;
         private readonly RateLimiter rateLimiter;
+        private bool isInitialized = false;
 
-         /// <summary>
+        /// <summary>
         /// Initializes a new instance of the <see cref="OpenAIService"/> class.
         /// </summary>
         /// <param name="config">The OpenAI service configuration.</param>
@@ -45,7 +46,7 @@ namespace SmartAssistant.Core.Services.LLM
         /// </summary>
         public LLMConfig Config => new() { ModelId = this.config.ModelId, LLMApiKey = this.config.ApiKey };
 
-/// <summary>
+        /// <summary>
         /// Generates a response from the OpenAI model based on the provided prompt.
         /// </summary>
         /// <param name="prompt">The input prompt to send to the model.</param>
@@ -59,6 +60,11 @@ namespace SmartAssistant.Core.Services.LLM
             {
                 return await this.rateLimiter.ExecuteWithRateLimitingAsync(modelId, async () =>
                 {
+                    if (!this.isInitialized)
+                    {
+                        this.Initialize();
+                    }
+
                     var chat = this.api.Chat.CreateConversation();
                     chat.AppendUserInput(prompt);
 
@@ -95,6 +101,11 @@ namespace SmartAssistant.Core.Services.LLM
             {
                 try
                 {
+                    if (!this.isInitialized)
+                    {
+                        this.Initialize();
+                    }
+
                     var chat = this.api.Chat.CreateConversation();
                     chat.AppendSystemMessage("Analyze the user's intent from their input. Provide a brief description of what they want to do.");
                     chat.AppendUserInput(userInput);
@@ -118,6 +129,11 @@ namespace SmartAssistant.Core.Services.LLM
             {
                 try
                 {
+                    if (!this.isInitialized)
+                    {
+                        this.Initialize();
+                    }
+
                     var chat = this.api.Chat.CreateConversation();
                     chat.AppendSystemMessage("Validate if the given task is safe and appropriate to execute. Respond with 'true' or 'false'.");
                     chat.AppendUserInput(task);
@@ -131,12 +147,22 @@ namespace SmartAssistant.Core.Services.LLM
             });
         }
 
-/// <inheritdoc/>
+        /// <summary>
+        /// Analyzes the given command to determine required tasks.
+        /// </summary>
+        /// <param name="command">The command to analyze.</param>
+        /// <returns>A collection of identified tasks from the command.</returns>
+        /// <inheritdoc/>
         public Task<IEnumerable<string>> AnalyzeTaskAsync(string command)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Handles rate limit exceptions from the OpenAI API.
+        /// </summary>
+        /// <param name="ex">The exception that caused the rate limit.</param>
+        /// <returns>A new <see cref="RateLimitExceededException"/> with appropriate retry time.</returns>
         private RateLimitExceededException HandleRateLimit(Exception ex)
         {
             this.logger.LogWarning(ex, "OpenAI rate limit exceeded");
@@ -147,7 +173,7 @@ namespace SmartAssistant.Core.Services.LLM
             // Try to extract specific wait time from error message
             if (ex.Message.Contains("try again in", StringComparison.OrdinalIgnoreCase))
             {
-                var match = MyRegex().Match(ex.Message);
+                var match = this.MyRegex().Match(ex.Message);
 
                 if (match.Success)
                 {
@@ -177,7 +203,16 @@ namespace SmartAssistant.Core.Services.LLM
                 ex);
         }
 
+        private void Initialize()
+        {
+            this.isInitialized = true;
+        }
+
+        /// <summary>
+        /// Generates a regex pattern for extracting retry time from OpenAI rate limit messages.
+        /// </summary>
+        /// <returns>A compiled regex pattern for matching retry time information.</returns>
         [GeneratedRegex(@"try again in (?:about )?(\d+) (\w+)", RegexOptions.IgnoreCase, "zh-CN")]
-        private static partial Regex MyRegex();
+        private partial Regex MyRegex();
     }
 }
