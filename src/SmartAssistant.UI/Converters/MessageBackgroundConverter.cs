@@ -22,10 +22,11 @@ namespace SmartAssistant.UI.Converters
         {
             if (value is bool isUser)
             {
-                return isUser 
+                return isUser
                     ? new SolidColorBrush(Color.FromRgb(230, 230, 230)) // Light gray for user messages
                     : new SolidColorBrush(Color.FromRgb(200, 220, 255));  // Light blue for assistant messages
             }
+
             return new SolidColorBrush(Colors.Transparent);
         }
 
