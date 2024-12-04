@@ -11,7 +11,7 @@ All notable changes to this project will be documented in this file.
 ### 技术细节
 - 更新了开发指南以反映最近的单元测试改进。
 
-## [v0.1.2] - 2024-02-08
+## [v0.1.2] - 2024-12-01
 
 ### Added
 - Git工作流规范
@@ -45,7 +45,7 @@ All notable changes to this project will be documented in this file.
   - FluentAssertions
   - Coverlet
 
-## [v0.1.1] - 2024-02-07
+## [v0.1.1] - 2024-11-25
 
 ### Added
 - 项目初始化配置和文档
@@ -67,7 +67,7 @@ All notable changes to this project will be documented in this file.
 ### Dependencies
 - 保持与 v0.1.0 相同
 
-## [v0.1.0] - 2024-01-31
+## [v0.1.0] - 2024-11-20
 
 ### Added
 - 基础的智能助手功能框架
