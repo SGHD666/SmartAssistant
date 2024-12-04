@@ -234,6 +234,6 @@ public class LoggingServiceDecorator : IService
 
 ## Related Documentation | 相关文档
 
-- [System Architecture](./system-architecture.md)
-- [Development Guidelines](../guides/development-guidelines.md)
-- [Code Style Guide](../guides/code-style.md)
+- [System Architecture | 系统架构](/docs/architecture/system-architecture.md)
+- [Development Guidelines | 开发指南](/docs/guides/development-guidelines.md)
+- [Code Style Guide | 代码风格指南](/docs/guides/code-style.md)
