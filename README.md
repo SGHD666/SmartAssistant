@@ -1,45 +1,28 @@
-# Smart Assistant
+# SmartAssistant
 
-![Version](https://img.shields.io/badge/version-v0.1.0-blue.svg)
+A powerful AI assistant that helps you automate tasks and manage your workflow.
 
-> ⚠️ **开发者注意**: 在开始任何开发工作之前，请务必先阅读 [开发准则](DEVELOPMENT_GUIDELINES.md)。
+## Documentation
 
-An intelligent cross-platform AI assistant powered by large language models that can understand and execute complex computer operations.
+All project documentation can be found in the [docs](./docs) directory:
 
-## Features
+- [API Documentation](./docs/api.md)
+- [Development Guidelines](./docs/DEVELOPMENT_GUIDELINES.md)
+- [Requirements](./docs/REQUIREMENTS.md)
+- [Roadmap](./docs/ROADMAP.md)
+- [Changelog](./docs/CHANGELOG.md)
 
-- Natural Language Understanding using GPT models
-- Voice Recognition and Text-to-Speech
-- Automated Task Execution
-- Cross-platform UI using Avalonia
-- Secure Local Data Storage
-- User Habit Learning
-
-## Project Structure
-
-- `src/SmartAssistant.Core` - Core business logic and services
-- `src/SmartAssistant.UI` - Avalonia-based cross-platform UI
-- `src/SmartAssistant.API` - ASP.NET Core Web API
-- `src/SmartAssistant.Automation` - Task automation implementations
-- `src/SmartAssistant.Common` - Shared utilities and models
-
-## Requirements
-
-- .NET 7.0 or later
-- Python 3.8 or later
-- Visual Studio 2022 or later / VS Code
-- SQLite
-
-## Getting Started
+## Quick Start
 
 1. Clone the repository
-2. Install the required .NET SDK
-3. Install Python dependencies: `pip install -r requirements.txt`
-4. Open the solution in Visual Studio
-5. Build and run the project
+2. Install dependencies
+3. Follow the initialization instructions in [初始化指令.txt](./docs/初始化指令.txt)
+4. Run the application
 
-## Security
+## Development
 
-- All sensitive data is encrypted at rest
-- API keys and credentials must be stored securely
-- Local-only data storage by default
+For development guidelines and best practices, please refer to our [Development Guidelines](./docs/DEVELOPMENT_GUIDELINES.md).
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.

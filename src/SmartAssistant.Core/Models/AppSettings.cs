@@ -19,26 +19,26 @@ namespace SmartAssistant.Core.Models
         /// <summary>
         /// Gets or sets the API key for the application.
         /// </summary>
-        public string ApiKey { get; set; }
+        public string? ApiKey { get; set; }
 
         /// <summary>
         /// Gets or sets the path to the Python executable.
         /// </summary>
-        public string PythonPath { get; set; }
+        public string? PythonPath { get; set; }
 
         /// <summary>
         /// Gets or sets the base path for the SmartAssistant.
         /// </summary>
-        public string BasePath { get; set; }
+        public string? BasePath { get; set; }
 
         /// <summary>
         /// Gets or sets the path to web drivers.
         /// </summary>
-        public string DriverPath { get; set; }
+        public string? DriverPath { get; set; }
 
         /// <summary>
         /// Gets or sets the configurations for different language models.
         /// </summary>
-        public Dictionary<string, LLMConfig> ModelConfigs { get; set; } = new Dictionary<string, LLMConfig>();
+        public Dictionary<string, LLMConfig>? ModelConfigs { get; set; }
     }
 }
