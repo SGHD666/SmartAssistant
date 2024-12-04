@@ -220,3 +220,171 @@ graph TD
 - 自定义模型训练
 
 注意：此路线图会根据用户反馈和实际开发情况进行调整。每个版本的具体功能可能会有所变化。
+
+## Current Version: 0.1.0
+
+## Short-term Goals (1-3 months)
+
+### Core Functionality
+- [ ] Enhance LLM integration
+  - [ ] Improve prompt engineering
+  - [ ] Add context management
+  - [ ] Implement conversation history
+- [ ] Task execution system improvements
+  - [ ] Add task queuing
+  - [ ] Implement task prioritization
+  - [ ] Add task cancellation support
+
+### UI/UX Improvements
+- [ ] Modern UI refresh
+  - [ ] Dark/Light theme support
+  - [ ] Customizable color schemes
+  - [ ] Responsive layouts
+- [ ] Enhanced chat interface
+  - [ ] Message grouping
+  - [ ] Code block syntax highlighting
+  - [ ] File attachment support
+
+### Development Infrastructure
+- [ ] CI/CD Pipeline
+  - [ ] Automated testing
+  - [ ] Code coverage reporting
+  - [ ] Automated deployment
+- [ ] Quality Assurance
+  - [ ] Static code analysis
+  - [ ] Performance benchmarking
+  - [ ] Security scanning
+
+## Medium-term Goals (3-6 months)
+
+### Advanced Features
+- [ ] Voice Integration
+  - [ ] Speech-to-text
+  - [ ] Text-to-speech
+  - [ ] Voice command recognition
+- [ ] File Operations
+  - [ ] Advanced file management
+  - [ ] Batch processing
+  - [ ] File type recognition
+
+### Performance Optimization
+- [ ] Memory management
+  - [ ] Resource pooling
+  - [ ] Cache optimization
+  - [ ] Memory leak prevention
+- [ ] Response time improvement
+  - [ ] Request batching
+  - [ ] Parallel processing
+  - [ ] Result caching
+
+### Developer Experience
+- [ ] Plugin System
+  - [ ] Plugin API design
+  - [ ] Plugin management
+  - [ ] Documentation
+- [ ] Development Tools
+  - [ ] Debug tooling
+  - [ ] Performance profiling
+  - [ ] Testing utilities
+
+## Long-term Goals (6+ months)
+
+### AI Capabilities
+- [ ] Multiple LLM Support
+  - [ ] Model switching
+  - [ ] Response comparison
+  - [ ] Cost optimization
+- [ ] Learning Capabilities
+  - [ ] User preference learning
+  - [ ] Task automation learning
+  - [ ] Pattern recognition
+
+### System Integration
+- [ ] External Service Integration
+  - [ ] Cloud storage
+  - [ ] Productivity tools
+  - [ ] Development platforms
+- [ ] API Ecosystem
+  - [ ] Public API
+  - [ ] SDK development
+  - [ ] API documentation
+
+### Enterprise Features
+- [ ] Multi-user Support
+  - [ ] User management
+  - [ ] Role-based access
+  - [ ] Team collaboration
+- [ ] Security Enhancements
+  - [ ] Encryption
+  - [ ] Audit logging
+  - [ ] Compliance features
+
+## Continuous Improvements
+
+### Documentation
+- [ ] User Documentation
+  - [ ] Feature guides
+  - [ ] Tutorials
+  - [ ] FAQ
+- [ ] Developer Documentation
+  - [ ] API reference
+  - [ ] Architecture guides
+  - [ ] Best practices
+
+### Testing
+- [ ] Test Coverage
+  - [ ] Unit tests
+  - [ ] Integration tests
+  - [ ] UI tests
+- [ ] Quality Metrics
+  - [ ] Performance metrics
+  - [ ] Code quality
+  - [ ] User satisfaction
+
+### Community
+- [ ] Open Source Community
+  - [ ] Contribution guidelines
+  - [ ] Community forums
+  - [ ] Regular updates
+- [ ] User Feedback
+  - [ ] Feature requests
+  - [ ] Bug reporting
+  - [ ] User surveys
+
+## Version Milestones
+
+### v0.2.0 (Next Release)
+- Core functionality improvements
+- Basic UI/UX updates
+- Initial CI/CD implementation
+
+### v0.3.0
+- Voice integration
+- Advanced file operations
+- Plugin system foundation
+
+### v0.4.0
+- Multiple LLM support
+- Performance optimizations
+- Developer tools
+
+### v1.0.0
+- Enterprise features
+- Full documentation
+- Production-ready deployment
+
+## Success Metrics
+
+### Technical Metrics
+- Test coverage > 80%
+- Response time < 500ms
+- Memory usage < 500MB
+
+### User Metrics
+- User satisfaction > 4.5/5
+- Daily active users > 1000
+- Task completion rate > 95%
+
+## Contribution
+
+We welcome contributions! Please see our [Contributing Guide](./guides/contributing.md) for details on how to participate in the project's development.
