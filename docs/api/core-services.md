@@ -280,6 +280,6 @@ public class AutomationException : Exception
 ```
 
 ## Related Documentation | 相关文档
-- [System Architecture](../architecture/system-architecture.md)
-- [Development Guidelines](../guides/development-guidelines.md)
-- [Testing Guide](../guides/testing.md)
+- [System Architecture | 系统架构](/docs/architecture/system-architecture.md)
+- [Development Guidelines | 开发指南](/docs/guides/development-guidelines.md)
+- [Testing Guide | 测试指南](/docs/guides/testing.md)
