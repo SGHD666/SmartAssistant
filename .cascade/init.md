@@ -28,6 +28,7 @@ Before starting any development work, please read through all the following docu
    - Maintain code stability and quality
    - Make informed decisions based on project documentation
    - Ensure thorough understanding before making changes
+   - The code follows StyleCop rules
 
 Remember: Always refer back to these documents when making decisions or implementing changes.
 

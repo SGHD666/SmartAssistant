@@ -18,62 +18,80 @@ namespace SmartAssistant.Core.Services
     /// <summary>
     /// Service for handling automation tasks including browser and system operations.
     /// </summary>
-    public class AutomationService : IAutomationService
+    public partial class AutomationService : IAutomationService
     {
-        private readonly ILogger<AutomationService> _logger;
-        private readonly AppSettings _settings;
-        private readonly IPythonRuntimeService _pythonRuntime;
-        private bool _isInitialized;
+        private readonly ILogger<AutomationService> logger;
+        private readonly AppSettings settings;
+        private readonly IPythonRuntimeService pythonRuntime;
+        private readonly Dictionary<string, Func<string, Task>> taskHandlers;
+        private bool isInitialized;
+        private ChromeDriver? driver;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutomationService"/> class.
+        /// </summary>
+        /// <param name="logger">The logger to use for logging service activities.</param>
+        /// <param name="settings">The application settings configuration.</param>
+        /// <param name="pythonRuntime">The Python runtime service for executing Python scripts.</param>
         public AutomationService(
             ILogger<AutomationService> logger,
             IOptions<AppSettings> settings,
             IPythonRuntimeService pythonRuntime)
         {
-            this._logger = logger;
-            this._settings = settings.Value;
-            this._pythonRuntime = pythonRuntime;
+            this.logger = logger;
+            this.settings = settings.Value;
+            this.pythonRuntime = pythonRuntime;
+            this.taskHandlers = [];
         }
 
+        /// <summary>
+        /// Initializes the automation service and its components.
+        /// This method ensures the service is only initialized once.
+        /// </summary>
         public void Initialize()
         {
-            if (this._isInitialized)
+            if (this.isInitialized)
             {
                 return;
             }
 
             try
             {
-                _logger.LogInformation("Initializing AutomationService...");
+                this.logger.LogInformation("Initializing AutomationService...");
 
-                // 确保Python运行时已初始化
-                _pythonRuntime.EnsureInitialized();
+                // Ensure Python runtime is initialized
+                this.pythonRuntime.EnsureInitialized();
 
-                this._isInitialized = true;
-                _logger.LogInformation("AutomationService initialized successfully");
+                this.isInitialized = true;
+                this.logger.LogInformation("AutomationService initialized successfully");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to initialize AutomationService");
+                this.logger.LogError(ex, "Failed to initialize AutomationService");
                 throw;
             }
         }
 
+        /// <summary>
+        /// Executes a Python script asynchronously using the Python runtime service.
+        /// </summary>
+        /// <param name="script">The Python script to execute.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation, containing the script's output as a string.</returns>
         public async Task<string> ExecutePythonScriptAsync(string script)
         {
             try
             {
-                if (!this._isInitialized)
+                if (!this.isInitialized)
                 {
-                    Initialize();
+                    this.Initialize();
                 }
 
-                _logger.LogDebug("Executing Python script...");
-                return await _pythonRuntime.ExecuteCodeAsync(script);
+                this.logger.LogDebug("Executing Python script...");
+                return await this.pythonRuntime.ExecuteCodeAsync(script);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to execute Python script");
+                this.logger.LogError(ex, "Failed to execute Python script");
                 throw;
             }
         }
@@ -93,9 +111,9 @@ namespace SmartAssistant.Core.Services
             try
             {
                 this.ValidateTaskDescription(taskDescription);
-                this._logger.LogInformation("Executing browser task: {Description}", taskDescription);
+                this.logger.LogInformation("Executing browser task: {Description}", taskDescription);
 
-                var taskType = this._taskHandlers.Keys
+                var taskType = this.taskHandlers.Keys
                     .FirstOrDefault(k => taskDescription.Contains(k, StringComparison.OrdinalIgnoreCase));
 
                 if (taskType == null)
@@ -104,12 +122,12 @@ namespace SmartAssistant.Core.Services
                 }
 
                 await this.InitializeBrowserIfNeededAsync();
-                await this._taskHandlers[taskType](taskDescription);
+                await this.taskHandlers[taskType](taskDescription);
                 return true;
             }
             catch (Exception ex) when (ex is not AutomationException)
             {
-                this._logger.LogError(ex, "Failed to execute browser task: {Description}", taskDescription);
+                this.logger.LogError(ex, "Failed to execute browser task: {Description}", taskDescription);
                 return false;
             }
         }
@@ -129,12 +147,12 @@ namespace SmartAssistant.Core.Services
             try
             {
                 this.ValidateTaskDescription(taskDescription);
-                this._logger.LogInformation("Executing system task: {Description}", taskDescription);
+                this.logger.LogInformation("Executing system task: {Description}", taskDescription);
 
-                var taskType = this._taskHandlers.Keys
+                var taskType = this.taskHandlers.Keys
                     .FirstOrDefault(k => taskDescription.Contains(k, StringComparison.OrdinalIgnoreCase));
 
-                if (taskType != null && this._taskHandlers.TryGetValue(taskType, out var handler))
+                if (taskType != null && this.taskHandlers.TryGetValue(taskType, out var handler))
                 {
                     await handler(taskDescription);
                     return true;
@@ -146,7 +164,7 @@ namespace SmartAssistant.Core.Services
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "System task failed: {Error}", ex.Message);
+                this.logger.LogError(ex, "System task failed: {Error}", ex.Message);
                 return false;
             }
         }
@@ -166,12 +184,12 @@ namespace SmartAssistant.Core.Services
             try
             {
                 this.ValidateTaskDescription(taskDescription);
-                this._logger.LogInformation("Executing file task: {Description}", taskDescription);
+                this.logger.LogInformation("Executing file task: {Description}", taskDescription);
 
-                var taskType = this._taskHandlers.Keys
+                var taskType = this.taskHandlers.Keys
                     .FirstOrDefault(k => taskDescription.Contains(k, StringComparison.OrdinalIgnoreCase));
 
-                if (taskType != null && this._taskHandlers.TryGetValue(taskType, out var handler))
+                if (taskType != null && this.taskHandlers.TryGetValue(taskType, out var handler))
                 {
                     await handler(taskDescription);
                     return true;
@@ -183,7 +201,7 @@ namespace SmartAssistant.Core.Services
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "File task failed: {Error}", ex.Message);
+                this.logger.LogError(ex, "File task failed: {Error}", ex.Message);
                 return false;
             }
         }
@@ -191,6 +209,7 @@ namespace SmartAssistant.Core.Services
         /// <summary>
         /// Validates a task description and checks if it can be executed.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns><see cref="bool"/> indicating whether the task can be executed.</returns>
         public bool ValidateTask(string taskDescription)
         {
@@ -202,12 +221,12 @@ namespace SmartAssistant.Core.Services
             try
             {
                 this.ValidateTaskDescription(taskDescription);
-                var taskType = this._taskHandlers.Keys
+                var taskType = this.taskHandlers.Keys
                     .FirstOrDefault(k => taskDescription.Contains(k, StringComparison.OrdinalIgnoreCase));
 
                 if (taskType == null)
                 {
-                    this._logger.LogWarning("Unsupported task type in description: {Description}", taskDescription);
+                    this.logger.LogWarning("Unsupported task type in description: {Description}", taskDescription);
                     return false;
                 }
 
@@ -222,7 +241,7 @@ namespace SmartAssistant.Core.Services
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Task validation failed: {Error}", ex.Message);
+                this.logger.LogError(ex, "Task validation failed: {Error}", ex.Message);
                 return false;
             }
         }
@@ -233,14 +252,14 @@ namespace SmartAssistant.Core.Services
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task InitializeBrowserIfNeededAsync()
         {
-            if (this._driver != null)
+            if (this.driver != null)
             {
                 return;
             }
 
             try
             {
-                this._driver = await Task.Run(() =>
+                this.driver = await Task.Run(() =>
                 {
                     var options = new ChromeOptions();
                     options.AddArgument("--start-maximized");
@@ -251,7 +270,7 @@ namespace SmartAssistant.Core.Services
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Failed to initialize browser");
+                this.logger.LogError(ex, "Failed to initialize browser");
                 throw;
             }
         }
@@ -259,6 +278,7 @@ namespace SmartAssistant.Core.Services
         /// <summary>
         /// Navigates to a URL based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task NavigateToUrlAsync(string taskDescription)
         {
@@ -270,14 +290,15 @@ namespace SmartAssistant.Core.Services
             await Task.Run(() =>
             {
                 var url = this.ExtractPattern(taskDescription, @"https?://[\w\-\.]+\.\w+[\w\-\._~:/?#\[\]@!\$&'\(\)\*\+,;=]*");
-                this._driver?.Navigate().GoToUrl(url);
-                this._logger.LogInformation("Navigated to URL: {Url}", url);
+                this.driver?.Navigate().GoToUrl(url);
+                this.logger.LogInformation("Navigated to URL: {Url}", url);
             });
         }
 
         /// <summary>
         /// Clicks an element based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task ClickElementAsync(string taskDescription)
         {
@@ -289,15 +310,16 @@ namespace SmartAssistant.Core.Services
             await Task.Run(() =>
             {
                 var elementText = this.ExtractElementText(taskDescription);
-                var element = this._driver?.FindElement(By.XPath($"//*[contains(text(), '{elementText}')"));
+                var element = this.driver?.FindElement(By.XPath($"//*[contains(text(), '{elementText}')"));
                 element?.Click();
-                this._logger.LogInformation("Clicked element with text: {Text}", elementText);
+                this.logger.LogInformation("Clicked element with text: {Text}", elementText);
             });
         }
 
         /// <summary>
         /// Types text into an element based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task TypeTextAsync(string taskDescription)
         {
@@ -309,23 +331,24 @@ namespace SmartAssistant.Core.Services
             var (elementText, typeInfo) = this.ExtractTypeInfo(taskDescription);
 
             // Use FindElementAsync if available, or wrap synchronous FindElement in Task.Run
-            var element = await Task.Run(() => this._driver?.FindElement(By.XPath($"//*[contains(text(), '{elementText}')]")));
+            var element = await Task.Run(() => this.driver?.FindElement(By.XPath($"//*[contains(text(), '{elementText}')]")));
 
             if (element != null)
             {
                 // Use SendKeysAsync if available, or wrap synchronous SendKeys in Task.Run
                 await Task.Run(() => element.SendKeys(typeInfo));
-                this._logger.LogInformation("Typed '{Text}' into element with text: {Element}", typeInfo, elementText);
+                this.logger.LogInformation("Typed '{Text}' into element with text: {Element}", typeInfo, elementText);
             }
             else
             {
-                this._logger.LogWarning("Could not find element with text: {Text}", elementText);
+                this.logger.LogWarning("Could not find element with text: {Text}", elementText);
             }
         }
 
         /// <summary>
         /// Adjusts the system volume based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task AdjustVolumeAsync(string taskDescription)
         {
@@ -338,7 +361,7 @@ namespace SmartAssistant.Core.Services
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                await this._pythonRuntime.ExecuteCodeAsync($@"
+                await this.pythonRuntime.ExecuteCodeAsync($@"
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
@@ -351,15 +374,16 @@ volume.SetMasterVolumeLevelScalar({level / 100.0}, None)
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                await this._pythonRuntime.ExecuteCodeAsync($"import os; os.system('amixer -D pulse sset Master {level}%')");
+                await this.pythonRuntime.ExecuteCodeAsync($"import os; os.system('amixer -D pulse sset Master {level}%')");
             }
 
-            this._logger.LogInformation("Set system volume to: {Level}%", level);
+            this.logger.LogInformation("Set system volume to: {Level}%", level);
         }
 
         /// <summary>
         /// Adjusts the monitor brightness based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task AdjustBrightnessAsync(string taskDescription)
         {
@@ -372,7 +396,7 @@ volume.SetMasterVolumeLevelScalar({level / 100.0}, None)
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                await this._pythonRuntime.ExecuteCodeAsync($@"
+                await this.pythonRuntime.ExecuteCodeAsync($@"
 import wmi
 c = wmi.WMI(namespace='root\\WMI')
 methods = c.WmiMonitorBrightnessMethods()[0]
@@ -381,18 +405,19 @@ methods.WmiSetBrightness(Brightness={level}, Timeout=500)
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                await this._pythonRuntime.ExecuteCodeAsync($@"
+                await this.pythonRuntime.ExecuteCodeAsync($@"
 import os
 display = os.popen('xrandr | grep ""connected"" | cut -f1 -d "" ""').read().strip()
 os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0}))");
             }
 
-            this._logger.LogInformation("Set monitor brightness to: {Level}%", level);
+            this.logger.LogInformation("Set monitor brightness to: {Level}%", level);
         }
 
         /// <summary>
         /// Opens a file based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OpenFileAsync(string taskDescription)
         {
@@ -418,12 +443,13 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
                 };
                 process.Start();
             });
-            this._logger.LogInformation("Opened file: {Path}", filePath);
+            this.logger.LogInformation("Opened file: {Path}", filePath);
         }
 
         /// <summary>
         /// Copies a file based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription"> <see cref="string"/> The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task CopyFileAsync(string taskDescription)
         {
@@ -445,12 +471,13 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
             }
 
             await Task.Run(() => File.Copy(sourcePath, destinationPath, true));
-            this._logger.LogInformation("Copied file from {Source} to {Destination}", sourcePath, destinationPath);
+            this.logger.LogInformation("Copied file from {Source} to {Destination}", sourcePath, destinationPath);
         }
 
         /// <summary>
         /// Deletes a file based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task DeleteFileAsync(string taskDescription)
         {
@@ -466,12 +493,13 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
             }
 
             await Task.Run(() => File.Delete(filePath));
-            this._logger.LogInformation("Deleted file: {Path}", filePath);
+            this.logger.LogInformation("Deleted file: {Path}", filePath);
         }
 
         /// <summary>
         /// Opens YouTube based on the provided task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to validate.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task OpenYouTubeAsync(string taskDescription)
         {
@@ -483,43 +511,35 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
             try
             {
                 await this.InitializeBrowserIfNeededAsync();
-                this._driver?.Navigate().GoToUrl("https://www.youtube.com");
-                this._logger.LogInformation("Successfully opened YouTube");
+                this.driver?.Navigate().GoToUrl("https://www.youtube.com");
+                this.logger.LogInformation("Successfully opened YouTube");
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Failed to open YouTube");
+                this.logger.LogError(ex, "Failed to open YouTube");
                 throw new AutomationException("Failed to open YouTube", ex);
             }
         }
 
-        private readonly Dictionary<string, Func<string, Task>> _taskHandlers;
+        [GeneratedRegex(@"click\s+(?:on\s+)?['""]?([^'""]+)['""]?", RegexOptions.IgnoreCase, "zh-CN")]
+        private static partial Regex MyRegex();
 
-        private IWebDriver? _driver;
+        [GeneratedRegex(@"type\s+['""]?([^'""]+)['""]?\s+into\s+['""]?([^'""]+)['""]?", RegexOptions.IgnoreCase, "zh-CN")]
+        private static partial Regex MyRegex1();
 
-        /// <summary>
-        /// Initializes required Python dependencies.
-        /// </summary>
-        private async Task InitializePythonDependencies()
-        {
-            try
-            {
-                await this._pythonRuntime.ExecuteCodeAsync(
-                "import sys\n" +
-                "import subprocess\n" +
-                "subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pycaw', 'comtypes', 'wmi'])");
-                this._logger.LogInformation("Successfully installed Python dependencies");
-            }
-            catch (Exception ex)
-            {
-                this._logger.LogError(ex, "Failed to install Python dependencies");
-                throw new AutomationException("Failed to initialize Python dependencies", ex);
-            }
-        }
+        [GeneratedRegex(@"['""]?((?:[a-zA-Z]:|[\\/])[^\s'""]+)['""]?")]
+        private static partial Regex MyRegex2();
+
+        [GeneratedRegex(@"['""]?((?:[a-zA-Z]:|[\\/])[^\s'""]+)['""]?")]
+        private static partial Regex MyRegex3();
+
+        [GeneratedRegex(@"(\d+)%?")]
+        private static partial Regex MyRegex4();
 
         /// <summary>
         /// Validates a task description.
         /// </summary>
+        /// <param name="taskDescription">The task description text to validate. Cannot be null or whitespace.</param>
         private void ValidateTaskDescription(string taskDescription)
         {
             if (string.IsNullOrWhiteSpace(taskDescription))
@@ -531,6 +551,8 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
         /// <summary>
         /// Extracts a pattern from a string.
         /// </summary>
+        /// <param name="input">The input string to extract the pattern from.</param>
+        /// <param name="pattern">The pattern to extract.</param>
         private string ExtractPattern(string input, string pattern)
         {
             var match = Regex.Match(input, pattern);
@@ -542,9 +564,10 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
         /// <summary>
         /// Extracts the text of an element from a task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to extract the element text from.</param>
         private string ExtractElementText(string taskDescription)
         {
-            var match = Regex.Match(taskDescription, @"click\s+(?:on\s+)?['""]?([^'""]+)['""]?", RegexOptions.IgnoreCase);
+            var match = MyRegex().Match(taskDescription);
             return match.Success
                 ? match.Groups[1].Value.Trim()
                 : throw new ArgumentException("No element text found in task description");
@@ -553,9 +576,10 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
         /// <summary>
         /// Extracts type information from a task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to extract type information from.</param>
         private (string ElementText, string TypeInfo) ExtractTypeInfo(string taskDescription)
         {
-            var match = Regex.Match(taskDescription, @"type\s+['""]?([^'""]+)['""]?\s+into\s+['""]?([^'""]+)['""]?", RegexOptions.IgnoreCase);
+            var match = MyRegex1().Match(taskDescription);
             return match.Success
                 ? (match.Groups[2].Value.Trim(), match.Groups[1].Value.Trim())
                 : throw new ArgumentException("No type information found in task description");
@@ -564,9 +588,10 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
         /// <summary>
         /// Extracts a file path from a task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to extract the file path from.</param>
         private string ExtractFilePath(string taskDescription)
         {
-            var match = Regex.Match(taskDescription, @"['""]?((?:[a-zA-Z]:|[\\/])[^\s'""]+)['""]?");
+            var match = MyRegex2().Match(taskDescription);
             return match.Success
                 ? match.Groups[1].Value
                 : throw new ArgumentException("No file path found in task description");
@@ -575,9 +600,10 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
         /// <summary>
         /// Extracts source and destination file paths from a task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to extract file paths from.</param>
         private (string Source, string Destination) ExtractFilePaths(string taskDescription)
         {
-            var matches = Regex.Matches(taskDescription, @"['""]?((?:[a-zA-Z]:|[\\/])[^\s'""]+)['""]?");
+            var matches = MyRegex3().Matches(taskDescription);
             return matches.Count >= 2
                 ? (matches[0].Groups[1].Value, matches[1].Groups[1].Value)
                 : throw new ArgumentException("Source and destination paths not found in task description");
@@ -586,39 +612,16 @@ os.system('xrandr --output ' + display + ' --brightness ' + str({level / 100.0})
         /// <summary>
         /// Extracts a numeric value from a task description.
         /// </summary>
+        /// <param name="taskDescription">The task description to extract the numeric value from.</param>
         private int ExtractNumericValue(string taskDescription)
         {
-            var match = Regex.Match(taskDescription, @"(\d+)%?");
+            var match = MyRegex4().Match(taskDescription);
             if (!match.Success || !int.TryParse(match.Groups[1].Value, out var value) || value < 0 || value > 100)
             {
                 throw new ArgumentException("Invalid numeric value in task description (must be between 0 and 100)");
             }
+
             return value;
-        }
-    }
-
-    /// <summary>
-    /// Exception thrown when an automation task fails.
-    /// </summary>
-    public class AutomationException : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutomationException"/> class.
-        /// </summary>
-        /// <param name="message">The error message that explains the reason for the exception.</param>
-        public AutomationException(string message)
-            : base(message)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutomationException"/> class.
-        /// </summary>
-        /// <param name="message">The error message that explains the reason for the exception.</param>
-        /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public AutomationException(string message, Exception innerException)
-            : base(message, innerException)
-        {
         }
     }
 }

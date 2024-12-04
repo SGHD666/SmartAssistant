@@ -1,5 +1,5 @@
-// <copyright file="QianWenService.cs" company="Codeium">
-// Copyright (c) Codeium. All rights reserved.
+// <copyright file="QianWenService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
 namespace SmartAssistant.Core.Services.LLM
@@ -17,10 +17,9 @@ namespace SmartAssistant.Core.Services.LLM
     /// </summary>
     public class QianWenService : ILanguageModelService
     {
-        private readonly HttpClient httpClient;
-        private readonly LLMConfig config;
-        private readonly ILogger<QianWenService> _logger;
-        private readonly bool _isConfigured;
+        private readonly HttpClient? httpClient;
+        private readonly ILogger<QianWenService>? logger;
+        private readonly bool isConfigured;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QianWenService"/> class.
@@ -29,39 +28,41 @@ namespace SmartAssistant.Core.Services.LLM
         /// <param name="logger">Logger instance for logging messages and events in the QianWen service.</param>
         public QianWenService(IOptions<ModelSettings> settings, ILogger<QianWenService> logger)
         {
-            this._logger = logger;
+            this.logger = logger;
             var modelSettings = settings?.Value ?? throw new ArgumentNullException(nameof(settings));
-            this.config = modelSettings.ModelConfigs["QianWen"];
+            this.Config = modelSettings.ModelConfigs!["QianWen"];
 
-            if (string.IsNullOrEmpty(this.config.BaseUrl))
+            if (string.IsNullOrEmpty(this.Config.BaseUrl))
             {
-                this._logger.LogWarning("BaseUrl is not configured for QianWen service");
-                this._isConfigured = false;
+                this.logger.LogWarning("BaseUrl is not configured for QianWen service");
+                this.isConfigured = false;
                 return;
             }
 
-            if (string.IsNullOrEmpty(this.config.LLMApiKey))
+            if (string.IsNullOrEmpty(this.Config.LLMApiKey))
             {
-                this._logger.LogWarning("API key is not configured for QianWen service");
-                this._isConfigured = false;
+                this.logger.LogWarning("API key is not configured for QianWen service");
+                this.isConfigured = false;
                 return;
             }
 
             this.httpClient = new HttpClient
             {
-                BaseAddress = new Uri(this.config.BaseUrl),
+                BaseAddress = new Uri(this.Config.BaseUrl),
             };
-            this.httpClient.DefaultRequestHeaders.Add("Authorization", this.config.LLMApiKey);
-            this._isConfigured = true;
+            this.httpClient.DefaultRequestHeaders.Add("Authorization", this.Config.LLMApiKey);
+            this.isConfigured = true;
         }
 
-        public LLMConfig Config => this.config;
+        /// <inheritdoc/>
+        public LLMConfig Config { get; }
 
+        /// <inheritdoc/>
         public async Task<string> GenerateResponseAsync(string prompt)
         {
-            if (!this._isConfigured)
+            if (!this.isConfigured)
             {
-                this._logger.LogWarning("QianWen service is not properly configured. Returning empty response.");
+                this.logger!.LogWarning("QianWen service is not properly configured. Returning empty response.");
                 return string.Empty;
             }
 
@@ -69,13 +70,13 @@ namespace SmartAssistant.Core.Services.LLM
             {
                 var requestBody = new
                 {
-                    model = this.config.ModelId,
-                    prompt = prompt,
-                    max_tokens = this.config.MaxTokens,
-                    temperature = this.config.Temperature,
+                    model = this.Config.ModelId,
+                    prompt,
+                    max_tokens = this.Config.MaxTokens,
+                    temperature = this.Config.Temperature,
                 };
 
-                var response = await this.httpClient.PostAsync(
+                var response = await this.httpClient!.PostAsync(
                     "v1/chat/completions",
                     new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json"));
 
@@ -86,16 +87,17 @@ namespace SmartAssistant.Core.Services.LLM
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error generating response from QianWen API");
+                this.logger!.LogError(ex, "Error generating response from QianWen API");
                 return string.Empty;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<string> AnalyzeIntentAsync(string userInput)
         {
-            if (!this._isConfigured)
+            if (!this.isConfigured)
             {
-                this._logger.LogWarning("QianWen service is not properly configured. Returning empty response.");
+                this.logger!.LogWarning("QianWen service is not properly configured. Returning empty response.");
                 return string.Empty;
             }
 
@@ -106,16 +108,17 @@ namespace SmartAssistant.Core.Services.LLM
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error analyzing intent");
+                this.logger!.LogError(ex, "Error analyzing intent");
                 return string.Empty;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ValidateTaskAsync(string task)
         {
-            if (!this._isConfigured)
+            if (!this.isConfigured)
             {
-                this._logger.LogWarning("QianWen service is not properly configured. Returning false.");
+                this.logger!.LogWarning("QianWen service is not properly configured. Returning false.");
                 return false;
             }
 
@@ -127,16 +130,17 @@ namespace SmartAssistant.Core.Services.LLM
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error validating task");
+                this.logger!.LogError(ex, "Error validating task");
                 return false;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<string>> AnalyzeTaskAsync(string command)
         {
-            if (!this._isConfigured)
+            if (!this.isConfigured)
             {
-                this._logger.LogWarning("QianWen service is not properly configured. Returning empty task list.");
+                this.logger!.LogWarning("QianWen service is not properly configured. Returning empty task list.");
                 return Array.Empty<string>();
             }
 
@@ -150,7 +154,7 @@ namespace SmartAssistant.Core.Services.LLM
             }
             catch (Exception ex)
             {
-                this._logger.LogError(ex, "Error analyzing task");
+                this.logger!.LogError(ex, "Error analyzing task");
                 return Array.Empty<string>();
             }
         }

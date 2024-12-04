@@ -6,8 +6,8 @@ namespace SmartAssistant.Core.Services.LLM
 {
     using System;
     using System.Threading.Tasks;
-    using Microsoft.Extensions.Options;
     using Polly;
+    using Polly.Retry;
     using SmartAssistant.Core.Models;
 
     /// <summary>
@@ -18,7 +18,7 @@ namespace SmartAssistant.Core.Services.LLM
         /// <summary>
         /// Lock object for thread-safe model switching.
         /// </summary>
-        private readonly object switchLock = new object();
+        private readonly object switchLock = new();
 
         /// <summary>
         /// Factory for creating language model service instances.
@@ -31,14 +31,14 @@ namespace SmartAssistant.Core.Services.LLM
         private readonly ModelSettings modelSettings;
 
         /// <summary>
+        /// Retry policy for rate limit handling.
+        /// </summary>
+        private readonly AsyncRetryPolicy<string> retryPolicy;
+
+        /// <summary>
         /// Currently active language model service.
         /// </summary>
         private volatile ILanguageModelService? currentService;
-
-        /// <summary>
-        /// Retry policy for rate limit handling.
-        /// </summary>
-        private readonly IAsyncPolicy<string> _retryPolicy;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ModelManager"/> class.
@@ -66,7 +66,7 @@ namespace SmartAssistant.Core.Services.LLM
             }
 
             // Configure retry policy for rate limits
-            this._retryPolicy = Policy<string>
+            this.retryPolicy = Policy<string>
                 .Handle<HttpRequestException>(ex => ex.Message.Contains("rate limit"))
                 .Or<Exception>(ex => ex.Message.Contains("rate limit"))
                 .WaitAndRetryAsync(
@@ -79,6 +79,26 @@ namespace SmartAssistant.Core.Services.LLM
 
             this.ValidateConfiguration();
             this.InitializeService();
+        }
+
+        /// <summary>
+        /// Gets the current model settings.
+        /// </summary>
+        public ModelSettings Settings => this.modelSettings;
+
+        /// <summary>
+        /// Gets the current model type.
+        /// </summary>
+        public LLMType CurrentModel => this.modelSettings.CurrentModel;
+
+        /// <summary>
+        /// Gets the current language model service.
+        /// </summary>
+        /// <returns>The current language model service.</returns>
+        public ILanguageModelService GetService()
+        {
+            this.EnsureServiceInitialized();
+            return this.currentService!;
         }
 
         /// <summary>
@@ -96,17 +116,14 @@ namespace SmartAssistant.Core.Services.LLM
 
             this.EnsureServiceInitialized();
 
-            return await this._retryPolicy.ExecuteAsync(async () =>
+            return await this.retryPolicy.ExecuteAsync(async () =>
             {
                 try
                 {
                     var service = this.currentService;
-                    if (service == null)
-                    {
-                        throw new InvalidOperationException("Language model service is not initialized");
-                    }
-
-                    return await service.GenerateResponseAsync(prompt);
+                    return service == null
+                        ? throw new InvalidOperationException("Language model service is not initialized")
+                        : await service.GenerateResponseAsync(prompt);
                 }
                 catch (Exception ex)
                 {
@@ -125,8 +142,8 @@ namespace SmartAssistant.Core.Services.LLM
             try
             {
                 Console.WriteLine($"Switching to model: {modelType}");
-                Console.WriteLine($"Available configs: {string.Join(", ", this.modelSettings.ModelConfigs.Select(c => $"{c.Key}:{c.Value.Type}"))}");
-                var config = this.modelSettings.ModelConfigs.Values
+                Console.WriteLine($"Available configs: {string.Join(", ", this.modelSettings.ModelConfigs!.Select(c => $"{c.Key}:{c.Value.Type}"))}");
+                var config = this.modelSettings.ModelConfigs!.Values
                     .FirstOrDefault(c => c.Type == modelType);
 
                 if (config == null)
@@ -155,6 +172,28 @@ namespace SmartAssistant.Core.Services.LLM
         }
 
         /// <summary>
+        /// Updates the model settings and reinitializes the service.
+        /// </summary>
+        /// <param name="newSettings">The new model settings to apply.</param>
+        public void UpdateSettings(ModelSettings newSettings)
+        {
+            ArgumentNullException.ThrowIfNull(newSettings);
+
+            lock (this.switchLock)
+            {
+                // Update the model settings
+                this.modelSettings.ApiKey = newSettings.ApiKey;
+                this.modelSettings.CurrentModel = newSettings.CurrentModel;
+                this.modelSettings.ModelConfigs = newSettings.ModelConfigs;
+                this.modelSettings.PythonPath = newSettings.PythonPath;
+                this.modelSettings.BasePath = newSettings.BasePath;
+
+                // Reinitialize the service with the new settings
+                this.currentService = this.factory.CreateService(this.modelSettings.CurrentModel);
+            }
+        }
+
+        /// <summary>
         /// Initializes the language model service.
         /// </summary>
         private void InitializeService()
@@ -162,7 +201,7 @@ namespace SmartAssistant.Core.Services.LLM
             try
             {
                 Console.WriteLine($"Initializing service for model type: {this.modelSettings.CurrentModel}");
-                var config = this.modelSettings.ModelConfigs.Values
+                var config = this.modelSettings.ModelConfigs!.Values
                     .FirstOrDefault(c => c.Type == this.modelSettings.CurrentModel);
 
                 if (config == null)
@@ -191,46 +230,6 @@ namespace SmartAssistant.Core.Services.LLM
         }
 
         /// <summary>
-        /// Validates the language model configuration.
-        /// </summary>
-        private void ValidateConfiguration()
-        {
-            try
-            {
-                Console.WriteLine("\nValidating configuration...");
-                
-                if (this.modelSettings.ModelConfigs == null)
-                {
-                    throw new InvalidOperationException("ModelConfigs is null");
-                }
-
-                if (!this.modelSettings.ModelConfigs.Any())
-                {
-                    throw new InvalidOperationException("ModelConfigs is empty");
-                }
-
-                var currentModelExists = this.modelSettings.ModelConfigs.Values
-                    .Any(c => c.Type == this.modelSettings.CurrentModel);
-
-                if (!currentModelExists)
-                {
-                    var availableTypes = string.Join(", ", 
-                        this.modelSettings.ModelConfigs.Values.Select(c => c.Type.ToString()));
-                    throw new InvalidOperationException(
-                        $"Current model {this.modelSettings.CurrentModel} not found in configuration. " +
-                        $"Available types: {availableTypes}");
-                }
-
-                Console.WriteLine("Configuration validation successful");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Configuration validation failed: {ex.Message}");
-                throw;
-            }
-        }
-
-        /// <summary>
         /// Ensures the language model service is initialized.
         /// </summary>
         private void EnsureServiceInitialized()
@@ -248,31 +247,43 @@ namespace SmartAssistant.Core.Services.LLM
         }
 
         /// <summary>
-        /// Tries to switch to a fallback language model if the current one is failing.
+        /// Validates the language model configuration.
         /// </summary>
-        private void TryFallbackModel()
+        private void ValidateConfiguration()
         {
-            lock (this.switchLock)
+            try
             {
-                try
-                {
-                    // Try to switch to a different model if current one is failing
-                    var currentType = this.modelSettings.CurrentModel;
-                    var availableModels = this.modelSettings.ModelConfigs.Values
-                        .Where(c => c.Type != currentType)
-                        .ToList();
+                Console.WriteLine("\nValidating configuration...");
 
-                    if (availableModels!.Count != 0)
-                    {
-                        // Try to switch to the first available alternative model
-                        var fallbackModel = availableModels.First().Type;
-                        this.SwitchModel(fallbackModel);
-                    }
-                }
-                catch
+                if (this.modelSettings.ModelConfigs == null)
                 {
-                    // Ignore fallback errors - we'll continue with current model
+                    throw new InvalidOperationException("ModelConfigs is null");
                 }
+
+                if (this.modelSettings.ModelConfigs.Count == 0)
+                {
+                    throw new InvalidOperationException("ModelConfigs is empty");
+                }
+
+                var currentModelExists = this.modelSettings.ModelConfigs.Values
+                    .Any(c => c.Type == this.modelSettings.CurrentModel);
+
+                if (!currentModelExists)
+                {
+                    var availableTypes = string.Join(
+                        ", ",
+                        this.modelSettings.ModelConfigs.Values.Select(c => c.Type.ToString()));
+                    throw new InvalidOperationException(
+                        $"Current model {this.modelSettings.CurrentModel} not found in configuration. " +
+                        $"Available types: {availableTypes}");
+                }
+
+                Console.WriteLine("Configuration validation successful");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Configuration validation failed: {ex.Message}");
+                throw;
             }
         }
     }

@@ -9,7 +9,7 @@ namespace SmartAssistant.Tests.Common
     /// </summary>
     public static class TestConfiguration
     {
-        private static IConfiguration _configuration;
+        private static IConfiguration? _configuration;
 
         /// <summary>
         /// 获取测试配置
@@ -34,7 +34,7 @@ namespace SmartAssistant.Tests.Common
         /// </summary>
         public static string GetValue(string key)
         {
-            return GetConfiguration()[key];
+            return GetConfiguration()[key]!;
         }
 
         /// <summary>

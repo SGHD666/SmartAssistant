@@ -5,26 +5,26 @@
 namespace SmartAssistant.Core.Services.LLM
 {
     using System;
+    using System.Collections.Generic;
     using System.Net.Http;
     using System.Text.RegularExpressions;
     using Microsoft.Extensions.Logging;
     using Microsoft.Extensions.Options;
     using OpenAI_API;
     using SmartAssistant.Core.Models;
-    using System.Collections.Generic;
 
     /// <summary>
     /// Service for interacting with OpenAI's language models.
     /// Implements the ILanguageModelService interface to provide GPT-3.5 and GPT-4 capabilities.
     /// </summary>
-    public class OpenAIService : ILanguageModelService
+    public partial class OpenAIService : ILanguageModelService
     {
-        private readonly ILogger<OpenAIService> _logger;
-        private readonly OpenAIServiceConfig _config;
-        private readonly OpenAIAPI _api;
-        private readonly RateLimiter _rateLimiter;
+        private readonly ILogger<OpenAIService> logger;
+        private readonly OpenAIServiceConfig config;
+        private readonly OpenAIAPI api;
+        private readonly RateLimiter rateLimiter;
 
-        /// <summary>
+         /// <summary>
         /// Initializes a new instance of the <see cref="OpenAIService"/> class.
         /// </summary>
         /// <param name="config">The OpenAI service configuration.</param>
@@ -34,95 +34,52 @@ namespace SmartAssistant.Core.Services.LLM
             IOptions<OpenAIServiceConfig> config,
             ILogger<OpenAIService> logger)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _config = config?.Value ?? throw new ArgumentNullException(nameof(config));
-            _api = new OpenAIAPI(new APIAuthentication(_config.ApiKey));
-            _rateLimiter = new RateLimiter();
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.config = config?.Value ?? throw new ArgumentNullException(nameof(config));
+            this.api = new OpenAIAPI(new APIAuthentication(this.config.ApiKey));
+            this.rateLimiter = new RateLimiter();
         }
 
         /// <summary>
         /// Gets the current LLM configuration.
         /// </summary>
-        public LLMConfig Config => new LLMConfig { ModelId = _config.ModelId, LLMApiKey = _config.ApiKey };
+        public LLMConfig Config => new() { ModelId = this.config.ModelId, LLMApiKey = this.config.ApiKey };
 
-        private RateLimitExceededException HandleRateLimit(Exception ex)
-        {
-            _logger.LogWarning(ex, "OpenAI rate limit exceeded");
-            
-            // Extract wait time from error message, default to 1 hour
-            var retryAfter = TimeSpan.FromHours(1);
-
-            // Try to extract specific wait time from error message
-            if (ex.Message.Contains("try again in", StringComparison.OrdinalIgnoreCase))
-            {
-                var match = Regex.Match(
-                    ex.Message, 
-                    @"try again in (?:about )?(\d+) (\w+)",
-                    RegexOptions.IgnoreCase);
-                
-                if (match.Success)
-                {
-                    var value = int.Parse(match.Groups[1].Value);
-                    var unit = match.Groups[2].Value.ToLower();
-                    
-                    retryAfter = unit switch
-                    {
-                        "minute" or "minutes" => TimeSpan.FromMinutes(value),
-                        "hour" or "hours" => TimeSpan.FromHours(value),
-                        "second" or "seconds" => TimeSpan.FromSeconds(value),
-                        _ => TimeSpan.FromHours(1)
-                    };
-
-                    _logger.LogInformation("Extracted retry time: {RetryTime} {Unit}", value, unit);
-                }
-            }
-
-            // Update rate limiter counter
-            var modelId = _config.ModelId ?? "gpt-3.5-turbo";
-            _rateLimiter.SetModelLimit(modelId, 1); // Temporarily set limit to 1 to force wait
-            _logger.LogInformation("Set temporary rate limit of 1 request for model {ModelId}", modelId);
-            
-            return new RateLimitExceededException(
-                $"OpenAI rate limit exceeded. Please try again in {retryAfter.TotalMinutes:F0} minutes.", 
-                retryAfter,
-                ex);
-        }
-
-        /// <summary>
+/// <summary>
         /// Generates a response from the OpenAI model based on the provided prompt.
         /// </summary>
         /// <param name="prompt">The input prompt to send to the model.</param>
         /// <returns>A task representing the asynchronous operation, containing the generated response.</returns>
         public async Task<string> GenerateResponseAsync(string prompt)
         {
-            var modelId = _config.ModelId ?? "gpt-3.5-turbo";
-            _logger.LogInformation("Generating response using model {ModelId}", modelId);
+            var modelId = this.config.ModelId ?? "gpt-3.5-turbo";
+            this.logger.LogInformation("Generating response using model {ModelId}", modelId);
 
             try
             {
-                return await _rateLimiter.ExecuteWithRateLimitingAsync(modelId, async () =>
+                return await this.rateLimiter.ExecuteWithRateLimitingAsync(modelId, async () =>
                 {
-                    var chat = _api.Chat.CreateConversation();
+                    var chat = this.api.Chat.CreateConversation();
                     chat.AppendUserInput(prompt);
-                    
+
                     string response = await chat.GetResponseFromChatbotAsync();
-                    _logger.LogDebug("Successfully generated response");
+                    this.logger.LogDebug("Successfully generated response");
                     return response;
                 });
             }
             catch (HttpRequestException ex) when (ex.Message.Contains("rate limit", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogWarning(ex, "Rate limit exceeded via HttpRequestException");
-                throw HandleRateLimit(ex);
+                this.logger.LogWarning(ex, "Rate limit exceeded via HttpRequestException");
+                throw this.HandleRateLimit(ex);
             }
             catch (Exception ex) when (ex.Message.Contains("rate limit", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogWarning(ex, "Rate limit exceeded via general exception");
-                throw HandleRateLimit(ex);
+                this.logger.LogWarning(ex, "Rate limit exceeded via general exception");
+                throw this.HandleRateLimit(ex);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating response");
+                this.logger.LogError(ex, "Error generating response");
                 throw;
             }
         }
@@ -134,18 +91,18 @@ namespace SmartAssistant.Core.Services.LLM
         /// <returns>A task representing the asynchronous operation, containing the analyzed intent.</returns>
         public async Task<string> AnalyzeIntentAsync(string userInput)
         {
-            return await _rateLimiter.ExecuteWithRateLimitingAsync(_config.ModelId, async () =>
+            return await this.rateLimiter.ExecuteWithRateLimitingAsync(this.config.ModelId!, async () =>
             {
                 try
                 {
-                    var chat = _api.Chat.CreateConversation();
+                    var chat = this.api.Chat.CreateConversation();
                     chat.AppendSystemMessage("Analyze the user's intent from their input. Provide a brief description of what they want to do.");
                     chat.AppendUserInput(userInput);
                     return await chat.GetResponseFromChatbotAsync();
                 }
                 catch (Exception ex) when (ex.Message.Contains("rate limit"))
                 {
-                    throw HandleRateLimit(ex);
+                    throw this.HandleRateLimit(ex);
                 }
             });
         }
@@ -157,11 +114,11 @@ namespace SmartAssistant.Core.Services.LLM
         /// <returns>A task representing the asynchronous operation, containing true if the task is valid, false otherwise.</returns>
         public async Task<bool> ValidateTaskAsync(string task)
         {
-            return await _rateLimiter.ExecuteWithRateLimitingAsync(_config.ModelId, async () =>
+            return await this.rateLimiter.ExecuteWithRateLimitingAsync(this.config.ModelId!, async () =>
             {
                 try
                 {
-                    var chat = _api.Chat.CreateConversation();
+                    var chat = this.api.Chat.CreateConversation();
                     chat.AppendSystemMessage("Validate if the given task is safe and appropriate to execute. Respond with 'true' or 'false'.");
                     chat.AppendUserInput(task);
                     var response = await chat.GetResponseFromChatbotAsync();
@@ -169,14 +126,58 @@ namespace SmartAssistant.Core.Services.LLM
                 }
                 catch (Exception ex) when (ex.Message.Contains("rate limit"))
                 {
-                    throw HandleRateLimit(ex);
+                    throw this.HandleRateLimit(ex);
                 }
             });
         }
 
+/// <inheritdoc/>
         public Task<IEnumerable<string>> AnalyzeTaskAsync(string command)
         {
             throw new NotImplementedException();
         }
+
+        private RateLimitExceededException HandleRateLimit(Exception ex)
+        {
+            this.logger.LogWarning(ex, "OpenAI rate limit exceeded");
+
+            // Extract wait time from error message, default to 1 hour
+            var retryAfter = TimeSpan.FromHours(1);
+
+            // Try to extract specific wait time from error message
+            if (ex.Message.Contains("try again in", StringComparison.OrdinalIgnoreCase))
+            {
+                var match = MyRegex().Match(ex.Message);
+
+                if (match.Success)
+                {
+                    var value = int.Parse(match.Groups[1].Value);
+                    var unit = match.Groups[2].Value.ToLower();
+
+                    retryAfter = unit switch
+                    {
+                        "minute" or "minutes" => TimeSpan.FromMinutes(value),
+                        "hour" or "hours" => TimeSpan.FromHours(value),
+                        "second" or "seconds" => TimeSpan.FromSeconds(value),
+                        _ => TimeSpan.FromHours(1),
+                    };
+
+                    this.logger.LogInformation("Extracted retry time: {RetryTime} {Unit}", value, unit);
+                }
+            }
+
+            // Update rate limiter counter
+            var modelId = this.config.ModelId ?? "gpt-3.5-turbo";
+            this.rateLimiter.SetModelLimit(modelId, 1); // Temporarily set limit to 1 to force wait
+            this.logger.LogInformation("Set temporary rate limit of 1 request for model {ModelId}", modelId);
+
+            return new RateLimitExceededException(
+                $"OpenAI rate limit exceeded. Please try again in {retryAfter.TotalMinutes:F0} minutes.",
+                retryAfter,
+                ex);
+        }
+
+        [GeneratedRegex(@"try again in (?:about )?(\d+) (\w+)", RegexOptions.IgnoreCase, "zh-CN")]
+        private static partial Regex MyRegex();
     }
 }
